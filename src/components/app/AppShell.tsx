@@ -95,13 +95,13 @@ export default function AppShell({ children, profile }: { children: React.ReactN
               >
                 <span
                   className="font-pixel text-base transition-colors"
-                  style={{ color: active ? "#a78bfa" : "#4a4a6a" }}
+                  style={{ color: active ? "#a78bfa" : "#7070a0" }}
                 >
                   {item.icon}
                 </span>
                 <span
-                  className={`font-tech text-xs tracking-wide transition-colors ${
-                    active ? "text-violet-300" : "text-[#5a5a7a] group-hover:text-white"
+                  className={`font-tech text-sm tracking-wide transition-colors ${
+                    active ? "text-violet-300" : "text-white/50 group-hover:text-white"
                   }`}
                 >
                   {item.label}
@@ -123,15 +123,15 @@ export default function AppShell({ children, profile }: { children: React.ReactN
                 {profile.pseudonym?.[0]?.toUpperCase()}
               </div>
               <div className="min-w-0">
-                <p className="font-tech text-xs text-white truncate">{profile.pseudonym}</p>
-                <p className="font-pixel text-[10px] text-[#4a4a6a] tracking-wide truncate">{profile.college}</p>
+                <p className="font-tech text-sm text-white truncate font-medium">{profile.pseudonym}</p>
+                <p className="font-tech text-xs text-white/40 truncate">{profile.college}</p>
               </div>
             </div>
             <button
               onClick={handleSignOut}
-              className="w-full font-pixel text-[10px] tracking-widest text-[#3a3a5a] hover:text-red-400 transition-colors text-left"
+              className="w-full font-tech text-xs text-white/30 hover:text-red-400 transition-colors text-left"
             >
-              SIGN OUT
+              Sign out
             </button>
           </div>
         )}

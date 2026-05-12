@@ -1,6 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
+const CATEGORY_COLOR: Record<string, string> = {
+  coding: "#a855f7", writing: "#3b82f6", quiz: "#06b6d4", design: "#10b981",
+};
+const CATEGORY_LABEL: Record<string, string> = {
+  coding: "Coding", writing: "Writing", quiz: "Quiz / DSA", design: "Design",
+};
+
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -19,69 +26,100 @@ export default async function DashboardPage() {
     .order("created_at", { ascending: false })
     .limit(6);
 
-  const CATEGORY_COLOR: Record<string, string> = {
-    coding: "#a855f7", writing: "#3b82f6", quiz: "#06b6d4", design: "#10b981",
-  };
+  const score = profile?.reliability_score ?? 70;
+  const scoreColor = score >= 80 ? "#10b981" : score >= 60 ? "#f59e0b" : "#ef4444";
+  const scoreLabel = score >= 80 ? "Reliable" : score >= 60 ? "Mixed" : "Caution";
 
   return (
     <div className="p-6 lg:p-10 max-w-5xl mx-auto">
-      {/* Header */}
+
+      {/* ── Header ───────────────────────────────────────────── */}
       <div className="mb-10">
-        <p className="font-pixel text-[11px] tracking-[0.25em] text-[#5a5a7a] mb-2">WELCOME BACK</p>
-        <h1 className="font-display font-bold text-white text-3xl lg:text-4xl">
+        <p className="font-tech text-sm text-white/50 mb-1">Welcome back</p>
+        <h1 className="font-display font-bold text-white text-4xl lg:text-5xl mb-2">
           Hey,{" "}
-          <span
-            className="font-script italic"
-            style={{ color: profile?.avatar_color ?? "#a855f7" }}
-          >
+          <span className="font-script italic" style={{ color: profile?.avatar_color ?? "#a855f7" }}>
             {profile?.pseudonym ?? "..."}
           </span>
         </h1>
-        <p className="font-tech text-xs text-[#5a5a7a] mt-1">
-          {profile?.college} · {profile?.branch} · {profile?.batch_year}
+        <p className="font-tech text-sm text-white/50">
+          {profile?.college}
+          {profile?.branch ? ` · ${profile.branch}` : ""}
+          {profile?.batch_year ? ` · ${profile.batch_year}` : ""}
         </p>
       </div>
 
-      {/* Quick stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        {[
-          { label: "RELIABILITY", value: profile?.reliability_score ?? 70, suffix: "/100", color: "#a855f7" },
-          { label: "BADGES", value: badges?.length ?? 0, suffix: " earned", color: "#3b82f6" },
-          { label: "MATCHES", value: 0, suffix: " total", color: "#06b6d4" },
-          { label: "REFERRALS", value: 0, suffix: " applied", color: "#10b981" },
-        ].map((s) => (
-          <div key={s.label} className="glass rounded-2xl p-5 border border-white/[0.05]">
-            <p className="font-pixel text-[10px] tracking-widest mb-2" style={{ color: s.color }}>{s.label}</p>
-            <p className="font-display font-bold text-white text-2xl">
-              {s.value}<span className="font-tech text-xs text-[#5a5a7a]">{s.suffix}</span>
-            </p>
+      {/* ── Stat cards ───────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+
+        {/* Reliability — special card with bar */}
+        <div className="col-span-2 lg:col-span-1 rounded-2xl p-5 border border-white/10"
+          style={{ background: `linear-gradient(135deg, ${scoreColor}12, ${scoreColor}06)`, borderColor: `${scoreColor}30` }}>
+          <p className="font-tech text-sm text-white/60 mb-3">Reliability Score</p>
+          <div className="flex items-end gap-2 mb-3">
+            <span className="font-display font-bold text-white text-4xl">{score}</span>
+            <span className="font-tech text-base text-white/40 mb-1">/ 100</span>
           </div>
-        ))}
+          <div className="w-full h-1.5 rounded-full bg-white/10 mb-2">
+            <div className="h-full rounded-full transition-all" style={{ width: `${score}%`, backgroundColor: scoreColor }} />
+          </div>
+          <p className="font-tech text-sm font-medium" style={{ color: scoreColor }}>{scoreLabel}</p>
+        </div>
+
+        {/* Badges */}
+        <div className="rounded-2xl p-5 border border-white/10" style={{ background: "rgba(59,130,246,0.06)" }}>
+          <p className="font-tech text-sm text-white/60 mb-3">Badges Earned</p>
+          <span className="font-display font-bold text-white text-4xl">{badges?.length ?? 0}</span>
+          <p className="font-tech text-sm text-white/40 mt-2">verified skills</p>
+        </div>
+
+        {/* Matches */}
+        <div className="rounded-2xl p-5 border border-white/10" style={{ background: "rgba(6,182,212,0.06)" }}>
+          <p className="font-tech text-sm text-white/60 mb-3">Matches</p>
+          <span className="font-display font-bold text-white text-4xl">0</span>
+          <p className="font-tech text-sm text-white/40 mt-2">total matches</p>
+        </div>
+
+        {/* Referrals */}
+        <div className="rounded-2xl p-5 border border-white/10" style={{ background: "rgba(16,185,129,0.06)" }}>
+          <p className="font-tech text-sm text-white/60 mb-3">Referrals</p>
+          <span className="font-display font-bold text-white text-4xl">0</span>
+          <p className="font-tech text-sm text-white/40 mt-2">applied</p>
+        </div>
       </div>
 
-      {/* Badges */}
-      <div className="mb-10">
-        <div className="flex items-center justify-between mb-4">
-          <p className="font-pixel text-[11px] tracking-[0.25em] text-[#5a5a7a]">YOUR BADGES</p>
-          <Link href="/challenges" className="font-tech text-xs text-violet-400 hover:text-violet-300 transition-colors">
+      {/* ── Badges section ───────────────────────────────────── */}
+      <div className="mb-12">
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-display font-bold text-white text-xl">Your Badges</h2>
+          <Link href="/challenges"
+            className="font-tech text-sm text-violet-400 hover:text-violet-300 transition-colors">
             Earn more →
           </Link>
         </div>
+
         {badges && badges.length > 0 ? (
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {badges.map((b) => {
-              const color = CATEGORY_COLOR[b.category] ?? "#7c3aed";
-              const challenge = Array.isArray(b.skill_challenges) ? b.skill_challenges[0] as { title: string } | undefined : b.skill_challenges as { title: string } | null;
+              const color     = CATEGORY_COLOR[b.category] ?? "#7c3aed";
+              const catLabel  = CATEGORY_LABEL[b.category] ?? b.category;
+              const challenge = Array.isArray(b.skill_challenges)
+                ? (b.skill_challenges[0] as { title: string } | undefined)
+                : (b.skill_challenges as { title: string } | null);
               return (
-                <div key={b.id} className="glass rounded-xl p-4 border border-white/[0.05] flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center font-pixel text-base shrink-0"
-                    style={{ background: `${color}15`, border: `1px solid ${color}25`, color }}>
+                <div key={b.id}
+                  className="flex items-center gap-4 rounded-xl p-4 border border-white/10 transition-all hover:border-white/20"
+                  style={{ background: `${color}08` }}>
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0"
+                    style={{ background: `${color}18`, border: `1px solid ${color}35`, color }}>
                     {"◈◎◆❋"[b.difficulty - 1] ?? "◈"}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-tech text-xs text-white truncate">{challenge?.title ?? b.category}</p>
-                    <p className="font-pixel text-[10px] tracking-widest" style={{ color }}>
-                      {b.category.toUpperCase()} · L{b.difficulty}
+                    <p className="font-display font-semibold text-white text-sm truncate mb-0.5">
+                      {challenge?.title ?? catLabel}
+                    </p>
+                    <p className="font-tech text-xs" style={{ color }}>
+                      {catLabel} · Level {b.difficulty}
                     </p>
                   </div>
                 </div>
@@ -89,40 +127,47 @@ export default async function DashboardPage() {
             })}
           </div>
         ) : (
-          <div className="glass rounded-2xl p-8 border border-white/[0.05] text-center">
-            <p className="font-pixel text-[11px] tracking-widest text-[#4a4a6a] mb-3">NO BADGES YET</p>
-            <p className="font-tech text-xs text-[#4a4a6a] mb-4">Complete challenges to earn verified skill badges.</p>
+          <div className="rounded-2xl p-10 border border-white/10 text-center"
+            style={{ background: "rgba(255,255,255,0.02)" }}>
+            <p className="font-display font-semibold text-white/70 text-lg mb-2">No badges yet</p>
+            <p className="font-tech text-sm text-white/40 mb-6">
+              Complete a challenge to earn your first verified skill badge.
+            </p>
             <Link href="/challenges"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl btn-primary text-white font-display font-semibold text-sm">
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl btn-primary text-white font-display font-semibold text-sm">
               Start a Challenge →
             </Link>
           </div>
         )}
       </div>
 
-      {/* Quick actions */}
+      {/* ── Quick actions ─────────────────────────────────────── */}
       <div>
-        <p className="font-pixel text-[11px] tracking-[0.25em] text-[#5a5a7a] mb-4">QUICK ACTIONS</p>
-        <div className="grid sm:grid-cols-2 gap-3">
+        <h2 className="font-display font-bold text-white text-xl mb-5">Quick Actions</h2>
+        <div className="grid sm:grid-cols-2 gap-4">
           {[
-            { href: "/challenges", label: "Earn a Badge", sub: "Prove your skills", icon: "◎", color: "#a855f7" },
-            { href: "/feed",       label: "Browse Merit Feed", sub: "Find teammates", icon: "◈", color: "#3b82f6" },
+            { href: "/challenges", label: "Earn a Badge",      sub: "Prove your skills with auto-graded challenges", icon: "◎", color: "#a855f7" },
+            { href: "/feed",       label: "Browse Merit Feed", sub: "Find teammates based on verified skills",        icon: "◈", color: "#3b82f6" },
           ].map((a) => (
             <Link key={a.href} href={a.href}
-              className="glass rounded-2xl p-5 border border-white/[0.05] hover:border-white/[0.1] transition-all group flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center font-pixel text-lg shrink-0"
-                style={{ background: `${a.color}12`, border: `1px solid ${a.color}25`, color: a.color }}>
+              className="flex items-center gap-4 rounded-2xl p-5 border border-white/10 hover:border-white/20 transition-all group"
+              style={{ background: `${a.color}08` }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl shrink-0 transition-transform group-hover:scale-110"
+                style={{ background: `${a.color}18`, border: `1px solid ${a.color}35`, color: a.color }}>
                 {a.icon}
               </div>
-              <div>
-                <p className="font-display font-semibold text-white text-sm group-hover:text-violet-200 transition-colors">{a.label}</p>
-                <p className="font-tech text-[11px] text-[#5a5a7a]">{a.sub}</p>
+              <div className="min-w-0">
+                <p className="font-display font-bold text-white text-base mb-1 group-hover:text-violet-200 transition-colors">
+                  {a.label}
+                </p>
+                <p className="font-tech text-sm text-white/50">{a.sub}</p>
               </div>
-              <span className="ml-auto font-pixel text-[#3a3a5a] group-hover:text-violet-400 transition-colors">→</span>
+              <span className="ml-auto text-white/30 group-hover:text-violet-400 transition-colors text-lg shrink-0">→</span>
             </Link>
           ))}
         </div>
       </div>
+
     </div>
   );
 }
