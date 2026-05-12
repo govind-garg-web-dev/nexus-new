@@ -13,7 +13,7 @@ const cols = [
   },
   {
     heading: "Company",
-    links: ["About", "Blog", "Privacy Policy", "Terms of Use"],
+    links: ["Sign In", "About", "Blog", "Privacy Policy", "Terms of Use"],
   },
 ];
 
@@ -58,8 +58,12 @@ export default function Footer() {
                 {col.links.map((link) => (
                   <li key={link}>
                     <a
-                      href="#"
-                      className="font-tech text-xs text-[#5a5a7a] hover:text-white transition-colors duration-200"
+                      href={link === "Sign In" ? "/sign-in" : link === "Join Waitlist" ? "#waitlist" : "#"}
+                      className={`font-tech text-xs transition-colors duration-200 ${
+                        link === "Sign In"
+                          ? "text-violet-400 hover:text-violet-300"
+                          : "text-[#5a5a7a] hover:text-white"
+                      }`}
                     >
                       {link}
                     </a>

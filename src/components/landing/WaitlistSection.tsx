@@ -144,6 +144,17 @@ export default function WaitlistSection() {
             <p className="font-tech text-[11px] text-[#3a3a5a] mt-8 tracking-wide">
               College email only · No spam · Unsubscribe anytime
             </p>
+
+            {/* Returning user */}
+            <p className="font-tech text-xs text-[#3a3a5a] mt-4">
+              Already have an account?{" "}
+              <a
+                href="/sign-in"
+                className="text-violet-400 hover:text-violet-300 transition-colors"
+              >
+                Sign in →
+              </a>
+            </p>
           </div>
         </motion.div>
       </div>

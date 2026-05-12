@@ -249,6 +249,22 @@ export default function Hero() {
             )}
           </motion.div>
 
+          {/* Returning user sign-in */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.52 }}
+            className="font-tech text-xs text-[#4a4a6a] mt-3"
+          >
+            Already on Nexus?{" "}
+            <a
+              href="/sign-in"
+              className="text-violet-400 hover:text-violet-300 transition-colors underline underline-offset-2 decoration-violet-500/30"
+            >
+              Sign in →
+            </a>
+          </motion.p>
+
           {/* Social proof avatars */}
           <motion.div
             initial={{ opacity: 0 }}
