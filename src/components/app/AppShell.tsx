@@ -17,6 +17,7 @@ type Profile = {
 const NAV = [
   { href: "/dashboard",         label: "Dashboard",    icon: "◈" },
   { href: "/feed",              label: "Merit Feed",   icon: "◆" },
+  { href: "/chat",              label: "Chat",         icon: "💬" },
   { href: "/challenges",        label: "Challenges",   icon: "◎" },
   { href: "/challenges/review", label: "Review Queue", icon: "◇" },
   { href: "/co-founder",        label: "Co-Founder",   icon: "🚀" },
