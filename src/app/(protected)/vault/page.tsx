@@ -149,14 +149,41 @@ export default function VaultPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const vote = async (uploadId: string, v: number, current: number) => {
-    const newVote = current === v ? 0 : v; // toggle off
-    await fetch("/api/vault/vote", {
+  const vote = (uploadId: string, v: number, current: number) => {
+    const newVote = current === v ? 0 : v; // same vote = toggle off
+
+    // ── Optimistic update — instant, no reload ──────────────
+    setUploads((prev) =>
+      prev.map((u) => {
+        if (u.id !== uploadId) return u;
+
+        let { upvotes, downvotes } = u;
+
+        // Remove old vote's count
+        if (current === 1)  upvotes   = Math.max(0, upvotes - 1);
+        if (current === -1) downvotes = Math.max(0, downvotes - 1);
+
+        // Add new vote's count
+        if (newVote === 1)  upvotes   += 1;
+        if (newVote === -1) downvotes += 1;
+
+        return { ...u, upvotes, downvotes, myVote: newVote };
+      })
+    );
+
+    // ── Fire-and-forget — revert on failure ─────────────────
+    fetch("/api/vault/vote", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ uploadId, vote: newVote }),
+    }).catch(() => {
+      // Revert to previous state if request failed
+      setUploads((prev) =>
+        prev.map((u) =>
+          u.id === uploadId ? { ...u, myVote: current } : u
+        )
+      );
     });
-    load();
   };
 
   const formatSize = (bytes: number | null) => {
