@@ -8,17 +8,18 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
 type Profile = {
-  pseudonym:        string;
-  avatar_color:     string;
+  pseudonym:         string;
+  avatar_color:      string;
   reliability_score: number;
-  college:          string;
+  college:           string;
 } | null;
 
 const NAV = [
-  { href: "/dashboard",  label: "Dashboard",   icon: "◈" },
-  { href: "/challenges", label: "Challenges",   icon: "◎" },
-  { href: "/feed",       label: "Merit Feed",   icon: "◆" },
-  { href: "/profile",    label: "My Profile",   icon: "❋" },
+  { href: "/dashboard",         label: "Dashboard",    icon: "◈" },
+  { href: "/challenges",        label: "Challenges",   icon: "◎" },
+  { href: "/challenges/review", label: "Review Queue", icon: "◇" },
+  { href: "/feed",              label: "Merit Feed",   icon: "◆" },
+  { href: "/profile",           label: "My Profile",   icon: "❋" },
 ];
 
 function ScoreBadge({ score }: { score: number }) {
@@ -27,7 +28,7 @@ function ScoreBadge({ score }: { score: number }) {
     score >= 60 ? "#f59e0b" : "#ef4444";
   const label =
     score >= 80 ? "RELIABLE" :
-    score >= 60 ? "MIXED" : "CAUTION";
+    score >= 60 ? "MIXED"    : "CAUTION";
 
   return (
     <div className="flex items-center gap-2">
@@ -42,21 +43,18 @@ function ScoreBadge({ score }: { score: number }) {
             style={{ filter: `drop-shadow(0 0 4px ${color})` }}
           />
         </svg>
-        <span
-          className="absolute inset-0 flex items-center justify-center font-tech text-[9px] font-bold"
-          style={{ color }}
-        >
+        <span className="absolute inset-0 flex items-center justify-center font-tech text-[9px] font-bold" style={{ color }}>
           {score}
         </span>
       </div>
-      <span className="font-pixel text-[10px] tracking-widest" style={{ color }}>{label}</span>
+      <span className="font-tech text-xs tracking-widest" style={{ color }}>{label}</span>
     </div>
   );
 }
 
 export default function AppShell({ children, profile }: { children: React.ReactNode; profile: Profile }) {
-  const pathname   = usePathname();
-  const router     = useRouter();
+  const pathname      = usePathname();
+  const router        = useRouter();
   const [open, setOpen] = useState(false);
 
   const handleSignOut = async () => {
@@ -66,13 +64,13 @@ export default function AppShell({ children, profile }: { children: React.ReactN
   };
 
   return (
-    <div className="min-h-screen bg-[#06060e] flex">
+    <div className="min-h-screen bg-void flex">
       {/* ── Sidebar ── */}
-      <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-56 border-r border-white/[0.06] bg-[#08080f] z-40">
+      <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-56 border-r border-white/6 bg-[#08080f] z-40">
         {/* Logo */}
-        <div className="px-5 py-5 border-b border-white/[0.05]">
+        <div className="px-5 py-5 border-b border-white/5">
           <Link href="/dashboard" className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-blue-600 flex items-center justify-center glow-sm-violet shrink-0">
+            <div className="w-7 h-7 rounded-lg bg-linear-to-br from-violet-600 to-blue-600 flex items-center justify-center glow-sm-violet shrink-0">
               <span className="font-pixel text-white text-sm">N</span>
             </div>
             <span className="font-display font-bold text-white tracking-tight">NEXUS</span>
@@ -90,7 +88,7 @@ export default function AppShell({ children, profile }: { children: React.ReactN
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-150 group ${
                   active
                     ? "bg-violet-500/10 border border-violet-500/20"
-                    : "hover:bg-white/[0.04] border border-transparent"
+                    : "hover:bg-white/4 border border-transparent"
                 }`}
               >
                 <span
@@ -99,11 +97,9 @@ export default function AppShell({ children, profile }: { children: React.ReactN
                 >
                   {item.icon}
                 </span>
-                <span
-                  className={`font-tech text-sm tracking-wide transition-colors ${
-                    active ? "text-violet-300" : "text-white/50 group-hover:text-white"
-                  }`}
-                >
+                <span className={`font-tech text-sm tracking-wide transition-colors ${
+                  active ? "text-violet-300" : "text-white/50 group-hover:text-white"
+                }`}>
                   {item.label}
                 </span>
               </Link>
@@ -113,7 +109,7 @@ export default function AppShell({ children, profile }: { children: React.ReactN
 
         {/* User card */}
         {profile && (
-          <div className="px-3 py-4 border-t border-white/[0.05] space-y-3">
+          <div className="px-3 py-4 border-t border-white/5 space-y-3">
             <ScoreBadge score={profile.reliability_score} />
             <div className="flex items-center gap-2.5">
               <div
@@ -138,9 +134,9 @@ export default function AppShell({ children, profile }: { children: React.ReactN
       </aside>
 
       {/* ── Mobile topbar ── */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass border-b border-white/[0.06] px-4 py-3 flex items-center justify-between">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass border-b border-white/6 px-4 py-3 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-blue-600 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-linear-to-br from-violet-600 to-blue-600 flex items-center justify-center">
             <span className="font-pixel text-white text-sm">N</span>
           </div>
           <span className="font-display font-bold text-white">NEXUS</span>
@@ -155,17 +151,17 @@ export default function AppShell({ children, profile }: { children: React.ReactN
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="lg:hidden fixed top-12 left-0 right-0 z-30 glass border-b border-white/[0.06] px-4 py-3 flex flex-col gap-1"
+          className="lg:hidden fixed top-12 left-0 right-0 z-30 glass border-b border-white/6 px-4 py-3 flex flex-col gap-1"
         >
           {NAV.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/[0.04] transition-colors"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/4 transition-colors"
             >
-              <span className="font-pixel text-[#5a5a7a]">{item.icon}</span>
-              <span className="font-tech text-xs text-[#7a7a9a]">{item.label}</span>
+              <span className="font-pixel text-white/40">{item.icon}</span>
+              <span className="font-tech text-sm text-white/60">{item.label}</span>
             </Link>
           ))}
         </motion.div>

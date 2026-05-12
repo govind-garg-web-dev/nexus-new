@@ -32,37 +32,23 @@ export async function POST(request: Request) {
 
     const admin = createAdminClient();
 
-    // Writing goes to peer review — auto-pass for MVP
-    const { data: submission } = await admin
+    // Writing goes to peer review queue — badge minted after 2 approvals
+    await admin
       .from("challenge_submissions")
       .insert({
         user_id:            user.id,
         challenge_id:       challengeId,
-        status:             "passed", // peer review in future block
+        status:             "under_review",
         submitted_text:     text,
         time_taken_seconds: timeTakenSeconds ?? null,
-      })
-      .select("id")
-      .single();
-
-    if (submission) {
-      await admin.from("badges").upsert({
-        user_id:       user.id,
-        challenge_id:  challengeId,
-        submission_id: submission.id,
-        category:      "writing",
-        difficulty:    challenge.difficulty,
-      }, { onConflict: "user_id,challenge_id", ignoreDuplicates: true });
-
-      await admin.rpc("apply_score_event", {
-        p_user_id:      user.id,
-        p_delta:        3,
-        p_reason:       "badge_earned",
-        p_reference_id: submission.id,
       });
-    }
 
-    return NextResponse.json({ status: "passed", badgeMinted: true, wordCount });
+    return NextResponse.json({
+      status: "under_review",
+      badgeMinted: false,
+      wordCount,
+      message: "Submitted for peer review. Your badge will be minted after 2 approvals from verified writers.",
+    });
   } catch (err) {
     console.error("Writing submit error:", err);
     return NextResponse.json({ error: "Submission failed." }, { status: 500 });
