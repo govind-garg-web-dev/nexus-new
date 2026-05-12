@@ -1,14 +1,116 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+
+// ── File preview modal ─────────────────────────────────────
+function FilePreviewModal({
+  file,
+  onClose,
+}: {
+  file: { url: string; name: string; title: string; mime: string | null } | null;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  if (!file) return null;
+
+  const isPdf   = file.mime === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+  const isImage = file.mime?.startsWith("image/") || /\.(png|jpe?g|webp|gif)$/i.test(file.name);
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-50 flex flex-col"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        style={{ background: "rgba(0,0,0,0.88)", backdropFilter: "blur(6px)" }}
+        onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      >
+        {/* Header bar */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/8 shrink-0"
+          style={{ background: "#08080f" }}>
+          {/* Title */}
+          <div className="flex-1 min-w-0">
+            <p className="font-display font-bold text-white text-sm truncate">{file.title}</p>
+            <p className="font-tech text-xs text-white/40 truncate">{file.name}</p>
+          </div>
+
+          {/* Actions */}
+          <a
+            href={file.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/12 bg-white/4 font-tech text-sm text-white/70 hover:text-white hover:border-white/20 transition-all shrink-0"
+          >
+            ↗ Open in new tab
+          </a>
+          <a
+            href={file.url}
+            download={file.name}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl btn-primary text-white font-tech text-sm shrink-0"
+          >
+            ↓ Download
+          </a>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-white/40 hover:text-white hover:border-white/20 transition-all shrink-0 font-display text-lg"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Content area */}
+        <div className="flex-1 overflow-hidden flex items-center justify-center p-4">
+          {isPdf && (
+            <iframe
+              src={file.url}
+              className="w-full h-full rounded-xl border border-white/10"
+              style={{ maxWidth: "100%", background: "#fff" }}
+              title={file.title}
+            />
+          )}
+
+          {isImage && !isPdf && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={file.url}
+              alt={file.title}
+              className="max-w-full max-h-full object-contain rounded-xl"
+            />
+          )}
+
+          {!isPdf && !isImage && (
+            <div className="text-center">
+              <p className="text-5xl mb-4">📄</p>
+              <p className="font-display font-semibold text-white text-lg mb-2">{file.title}</p>
+              <p className="font-tech text-sm text-white/50 mb-6">
+                This file type can&apos;t be previewed in the browser.
+              </p>
+              <a href={file.url} download={file.name}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl btn-primary text-white font-display font-semibold text-sm">
+                ↓ Download file
+              </a>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
 
 type Upload = {
   id: string; title: string; college: string; branch: string;
   semester: number | null; course_code: string | null; course_name: string;
   year: number | null; type: string; file_url: string; file_name: string;
-  file_size: number | null; upvotes: number; downvotes: number; myVote: number;
+  file_size: number | null; mime_type: string | null;
+  upvotes: number; downvotes: number; myVote: number;
   created_at: string;
   uploader: { pseudonym: string; avatar_color: string; vault_karma: number } | null;
 };
@@ -21,6 +123,8 @@ const TYPE_LABEL: Record<string, string> = {
 };
 const SEMESTERS = Array.from({ length: 8 }, (_, i) => i + 1);
 
+type PreviewFile = { url: string; name: string; title: string; mime: string | null };
+
 export default function VaultPage() {
   const [uploads, setUploads]   = useState<Upload[]>([]);
   const [loading, setLoading]   = useState(true);
@@ -28,6 +132,7 @@ export default function VaultPage() {
   const [branch, setBranch]     = useState("");
   const [semester, setSemester] = useState("");
   const [type, setType]         = useState("");
+  const [preview, setPreview]   = useState<PreviewFile | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -149,10 +254,12 @@ export default function VaultPage() {
 
                   {/* Info */}
                   <div className="flex-1 min-w-0">
-                    <a href={u.file_url} target="_blank" rel="noopener noreferrer"
-                      className="font-display font-bold text-white text-base hover:text-violet-200 transition-colors group-hover:underline">
+                    <button
+                      onClick={() => setPreview({ url: u.file_url, name: u.file_name, title: u.title, mime: u.mime_type ?? null })}
+                      className="font-display font-bold text-white text-base hover:text-violet-200 transition-colors text-left group-hover:underline"
+                    >
                       {u.title}
-                    </a>
+                    </button>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                       <span className="font-tech text-xs text-white/40">{u.branch}</span>
                       {u.semester && <span className="font-tech text-xs text-white/40">Sem {u.semester}</span>}
@@ -196,6 +303,9 @@ export default function VaultPage() {
           })}
         </div>
       )}
+
+      {/* File preview modal */}
+      {preview && <FilePreviewModal file={preview} onClose={() => setPreview(null)} />}
     </div>
   );
 }

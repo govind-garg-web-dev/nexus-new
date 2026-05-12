@@ -25,7 +25,7 @@ export async function GET(request: Request) {
 
     let query = supabase
       .from("vault_uploads")
-      .select("id, title, college, branch, semester, course_code, course_name, year, type, file_url, file_name, file_size, upvotes, downvotes, uploader_id, created_at")
+      .select("id, title, college, branch, semester, course_code, course_name, year, type, file_url, file_name, file_size, mime_type, upvotes, downvotes, uploader_id, created_at")
       .order("upvotes", { ascending: false })
       .order("created_at", { ascending: false })
       .range(page * 20, page * 20 + 19);
