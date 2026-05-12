@@ -12,40 +12,45 @@ export async function POST(request: Request) {
       );
     }
 
-    // Verify user is authenticated
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
     }
 
-    const mobile = `91${phone}`;
+    const authkey    = process.env.MSG91_AUTH_KEY!;
+    const templateId = process.env.MSG91_TEMPLATE_ID!;
+    const mobile     = `91${phone}`;
 
-    const res = await fetch("https://control.msg91.com/api/v5/otp", {
+    // Pass authkey in both header and query param — MSG91 v5 accepts both
+    const url = `https://control.msg91.com/api/v5/otp?authkey=${authkey}&template_id=${templateId}&mobile=${mobile}`;
+
+    const res = await fetch(url, {
       method: "POST",
       headers: {
-        authkey: process.env.MSG91_AUTH_KEY!,
+        authkey,
         "Content-Type": "application/json",
-        accept: "application/json",
+        accept:         "application/json",
       },
-      body: JSON.stringify({
-        template_id: process.env.MSG91_TEMPLATE_ID!,
-        mobile,
-        sender: process.env.MSG91_SENDER_ID!,
-      }),
+      // Minimal body — sender is set on the template in MSG91 dashboard
+      body: JSON.stringify({ template_id: templateId, mobile }),
     });
 
-    const result = await res.json();
+    let result: Record<string, unknown> = {};
+    try { result = await res.json(); } catch { /* non-JSON response */ }
 
-    if (!res.ok || result.type === "error") {
-      console.error("MSG91 error:", result);
+    console.log("[OTP send] MSG91 response:", res.status, result);
+
+    if (result.type === "error" || (!res.ok && result.type !== "success")) {
+      const msg91Error = (result.message as string) ?? "Unknown MSG91 error";
+      console.error("[OTP send] MSG91 error:", msg91Error);
       return NextResponse.json(
-        { error: "Failed to send OTP. Please try again." },
+        { error: `SMS failed: ${msg91Error}` },
         { status: 500 }
       );
     }
 
-    // Store the phone against this user (unverified)
+    // Store phone (unverified) against user
     await supabase
       .from("users")
       .update({ phone, phone_verified: false })
@@ -53,7 +58,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("OTP send error:", err);
+    console.error("[OTP send] exception:", err);
     return NextResponse.json({ error: "Server error." }, { status: 500 });
   }
 }
