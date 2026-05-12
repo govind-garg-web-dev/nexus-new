@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUserId } from "@/lib/supabase/server";
 import Link from "next/link";
 
 const CATEGORY_META: Record<string, { color: string; icon: string; label: string; desc: string }> = {
@@ -12,8 +12,7 @@ const DIFF_LABEL = ["", "Level 1", "Level 2", "Level 3"];
 const DIFF_COLOR = ["", "#10b981", "#f59e0b", "#ef4444"];
 
 export default async function ChallengesPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const [supabase, userId] = await Promise.all([createClient(), getUserId()]);
 
   const [{ data: challenges }, { data: earnedBadges }] = await Promise.all([
     supabase
@@ -24,7 +23,7 @@ export default async function ChallengesPage() {
     supabase
       .from("badges")
       .select("challenge_id")
-      .eq("user_id", user!.id)
+      .eq("user_id", userId!)
       .gt("expires_at", new Date().toISOString()),
   ]);
 

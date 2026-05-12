@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUserId } from "@/lib/supabase/server";
 import Link from "next/link";
 
 const CATEGORY_COLOR: Record<string, string> = {
@@ -9,22 +9,23 @@ const CATEGORY_LABEL: Record<string, string> = {
 };
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const [supabase, userId] = await Promise.all([createClient(), getUserId()]);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("pseudonym, avatar_color, reliability_score, college, branch, batch_year")
-    .eq("id", user!.id)
-    .single();
-
-  const { data: badges } = await supabase
-    .from("badges")
-    .select("id, category, difficulty, skill_challenges(title)")
-    .eq("user_id", user!.id)
-    .gt("expires_at", new Date().toISOString())
-    .order("created_at", { ascending: false })
-    .limit(6);
+  // Fetch profile + badges in parallel — no getUser() network call needed
+  const [{ data: profile }, { data: badges }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("pseudonym, avatar_color, reliability_score, college, branch, batch_year")
+      .eq("id", userId!)
+      .single(),
+    supabase
+      .from("badges")
+      .select("id, category, difficulty, skill_challenges(title)")
+      .eq("user_id", userId!)
+      .gt("expires_at", new Date().toISOString())
+      .order("created_at", { ascending: false })
+      .limit(6),
+  ]);
 
   const score = profile?.reliability_score ?? 70;
   const scoreColor = score >= 80 ? "#10b981" : score >= 60 ? "#f59e0b" : "#ef4444";

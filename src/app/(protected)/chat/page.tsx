@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getUserId } from "@/lib/supabase/server";
 import Link from "next/link";
 
 type ConversationRow = {
@@ -11,8 +11,8 @@ type ConversationRow = {
 };
 
 export default async function ChatInboxPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const [supabase, userId] = await Promise.all([createClient(), getUserId()]);
+  const user = { id: userId! };
 
   // All revealed matches for this user
   const { data: matches } = await supabase

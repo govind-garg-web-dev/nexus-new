@@ -25,3 +25,12 @@ export async function createClient() {
     }
   );
 }
+
+// Fast user ID extraction from the session cookie — no network call.
+// Safe to use in server pages/components that are already behind the
+// protected layout (which has already called getUser() for security).
+export async function getUserId(): Promise<string | null> {
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.user?.id ?? null;
+}
