@@ -10,7 +10,7 @@ export async function GET() {
 
     const { data: rooms } = await supabase
       .from("study_rooms")
-      .select(`id, subject, status, timer_ends_at, phase, max_members, pomodoro_mins, break_mins, jitsi_room_id, created_at,
+      .select(`id, host_id, subject, status, timer_ends_at, phase, max_members, pomodoro_mins, break_mins, jitsi_room_id, created_at,
         study_room_members(count)`)
       .neq("status", "ended")
       .order("created_at", { ascending: false })

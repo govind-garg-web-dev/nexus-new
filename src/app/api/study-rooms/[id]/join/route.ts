@@ -13,15 +13,16 @@ export async function POST(_req: Request, { params }: Params) {
 
     const { data: room } = await supabase
       .from("study_rooms")
-      .select("id, status, max_members, study_room_members(count)")
+      .select("id, host_id, status, max_members, study_room_members(count)")
       .eq("id", id)
       .single();
 
     if (!room) return NextResponse.json({ error: "Room not found." }, { status: 404 });
     if (room.status === "ended") return NextResponse.json({ error: "This room has ended." }, { status: 400 });
 
-    // No mid-session join during a Pomodoro
-    if (room.status === "pomodoro") {
+    // No mid-session join during a Pomodoro — EXCEPT for the host
+    // (host may have closed the tab and needs to get back in)
+    if (room.status === "pomodoro" && room.host_id !== user.id) {
       return NextResponse.json({
         error: "A Pomodoro is in progress. You can join during the next break.",
         canJoinAt: "next_break",

@@ -39,10 +39,17 @@ export default function StudyRoomsPage() {
   const [rooms, setRooms]       = useState<Room[]>([]);
   const [loading, setLoading]   = useState(true);
   const [joining, setJoining]   = useState<string | null>(null);
+  const [myId, setMyId]         = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [subject, setSubject]   = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [error, setError]       = useState("");
+
+  useEffect(() => {
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      createClient().auth.getUser().then(({ data }) => setMyId(data.user?.id ?? null));
+    });
+  }, []);
 
   const load = async () => {
     const res = await fetch("/api/study-rooms");
@@ -125,7 +132,9 @@ export default function StudyRoomsPage() {
         <div className="space-y-3">
           {rooms.map((room, i) => {
             const memberCount = room.study_room_members?.[0]?.count ?? 0;
-            const canJoin     = room.status !== "pomodoro" && memberCount < room.max_members;
+            // Host can always rejoin their own room, even during a Pomodoro
+            const isMyRoom = (room as unknown as { host_id?: string }).host_id === myId;
+            const canJoin  = isMyRoom || (room.status !== "pomodoro" && memberCount < room.max_members);
             return (
               <motion.div key={room.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
                 className="rounded-2xl border border-white/8 p-5 flex items-center gap-4" style={{ background: "rgba(255,255,255,0.02)" }}>
@@ -151,7 +160,7 @@ export default function StudyRoomsPage() {
                   style={{ background: canJoin ? undefined : "rgba(255,255,255,0.02)" }}
                   title={!canJoin && room.status === "pomodoro" ? "Wait for the break to join" : ""}
                 >
-                  {joining === room.id ? "…" : canJoin ? "Join →" : room.status === "pomodoro" ? "Wait for break" : "Full"}
+                  {joining === room.id ? "…" : isMyRoom ? "Open →" : canJoin ? "Join →" : room.status === "pomodoro" ? "Wait for break" : "Full"}
                 </button>
               </motion.div>
             );
