@@ -18,8 +18,10 @@ const NAV = [
   { href: "/dashboard",         label: "Dashboard",    icon: "◈" },
   { href: "/feed",              label: "Merit Feed",   icon: "◆" },
   { href: "/chat",              label: "Chat",         icon: "💬" },
+  { href: "/vault",             label: "Academic Vault", icon: "📚" },
+  { href: "/study-rooms",       label: "Study Rooms",  icon: "🍅" },
+  { href: "/consulting",        label: "Help Rooms",   icon: "🛠" },
   { href: "/challenges",        label: "Challenges",   icon: "◎" },
-  { href: "/challenges/review", label: "Review Queue", icon: "◇" },
   { href: "/co-founder",        label: "Co-Founder",   icon: "🚀" },
   { href: "/profile",           label: "My Profile",   icon: "❋" },
 ];

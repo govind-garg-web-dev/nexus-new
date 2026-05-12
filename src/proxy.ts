@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { validateCollegeEmail } from "@/lib/college-domains";
 
 // Routes that require authentication
-const PROTECTED_ROUTES = ["/dashboard", "/profile", "/feed", "/chat", "/challenges", "/co-founder", "/co-founder"];
+const PROTECTED_ROUTES = ["/dashboard", "/profile", "/feed", "/chat", "/challenges", "/co-founder", "/vault", "/study-rooms", "/consulting"];
 // Routes only for unauthenticated users
 const AUTH_ONLY_ROUTES = ["/sign-in"];
 
