@@ -1,3 +1,9 @@
+// Dev/testing override — these specific emails bypass all domain checks.
+// Remove before going live beyond testing.
+const DEV_ALLOWED_EMAILS = new Set([
+  "govindgarg.ne@gmail.com",
+]);
+
 // Domains that are always rejected regardless of other rules
 const BLOCKED_DOMAINS = new Set([
   "gmail.com", "yahoo.com", "yahoo.co.in", "outlook.com", "hotmail.com",
@@ -148,6 +154,11 @@ export function validateCollegeEmail(email: string): EmailValidationResult {
   }
 
   const domain = parts[1];
+
+  // Dev override — specific emails that bypass all checks
+  if (DEV_ALLOWED_EMAILS.has(lower)) {
+    return { valid: true, domain, collegeName: "Developer Account" };
+  }
 
   // Explicit block list
   if (BLOCKED_DOMAINS.has(domain)) {
