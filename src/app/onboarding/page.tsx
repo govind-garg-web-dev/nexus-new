@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { getCollegeName } from "@/lib/college-domains";
+import CollegeSearch from "@/components/ui/CollegeSearch";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 const BRANCHES = [
   "Computer Science & Engineering",
@@ -244,14 +246,14 @@ function ProfileStep({ userEmail, onDone }: { userEmail: string; onDone: () => v
         Create your{" "}
         <span className="font-script italic gradient-text">alias.</span>
       </h2>
-      <p className="font-tech text-xs text-[#5a5a7a] mb-8 leading-relaxed">
+      <p className="font-tech text-sm text-[#8888aa] mb-8 leading-relaxed">
         This is what the campus sees. Your real name stays hidden until you choose to reveal it.
       </p>
 
       {/* Avatar color picker */}
       <div className="mb-6">
-        <label className="font-pixel text-[11px] tracking-widest text-[#5a5a7a] block mb-3">
-          AVATAR COLOR
+        <label className="font-tech text-xs font-semibold text-[#8888aa] block mb-3">
+          Avatar Color
         </label>
         <div className="flex gap-2">
           {AVATAR_COLORS.map((c) => (
@@ -276,10 +278,10 @@ function ProfileStep({ userEmail, onDone }: { userEmail: string; onDone: () => v
       </div>
 
       {/* Pseudonym */}
-      <div className="mb-4">
+      <div className="mb-5">
         <div className="flex items-center justify-between mb-2">
-          <label className="font-pixel text-[11px] tracking-widest text-[#5a5a7a]">PSEUDONYM</label>
-          <span className="font-tech text-[11px]">{pseudonymStatus}</span>
+          <label className="font-tech text-xs font-semibold text-[#8888aa]">Pseudonym</label>
+          <span className="font-tech text-xs">{pseudonymStatus}</span>
         </div>
         <input
           placeholder="PixelMage_87"
@@ -289,53 +291,46 @@ function ProfileStep({ userEmail, onDone }: { userEmail: string; onDone: () => v
             setPseudonym(v);
             checkPseudonym(v);
           }}
-          className="w-full px-4 py-3.5 rounded-xl glass border border-white/[0.08] text-white placeholder-[#3a3a5a] font-tech text-sm focus:outline-none focus:border-violet-500/40 transition-colors"
+          className="w-full px-4 py-3.5 rounded-xl bg-white/3 border border-white/10 text-white placeholder-[#3a3a5a] font-tech text-sm focus:outline-none focus:border-violet-500/50 focus:bg-white/5 transition-all"
         />
-        <p className="font-tech text-[10px] text-[#4a4a6a] mt-1.5">3–20 chars · letters, numbers, underscore only</p>
+        <p className="font-tech text-xs text-[#5a5a7a] mt-1.5">3–20 chars · letters, numbers, underscore only</p>
       </div>
 
-      {/* College */}
-      <div className="mb-4">
-        <label className="font-pixel text-[11px] tracking-widest text-[#5a5a7a] block mb-2">COLLEGE</label>
-        <input
-          placeholder="Your college name"
-          value={college}
-          onChange={(e) => setCollege(e.target.value)}
-          className="w-full px-4 py-3.5 rounded-xl glass border border-white/[0.08] text-white placeholder-[#3a3a5a] font-tech text-sm focus:outline-none focus:border-violet-500/40 transition-colors"
-        />
+      {/* College — searchable autocomplete */}
+      <div className="mb-5">
+        <label className="font-tech text-xs font-semibold text-[#8888aa] block mb-2">College</label>
+        <CollegeSearch value={college} onChange={setCollege} />
         {detectedCollege && (
-          <p className="font-pixel text-[10px] text-violet-400 mt-1.5 tracking-wide">
-            ◈ AUTO-DETECTED FROM {domain.toUpperCase()}
+          <p className="font-tech text-xs text-violet-400 mt-1.5">
+            ◈ Auto-detected from {domain}
           </p>
         )}
       </div>
 
-      {/* Branch */}
-      <div className="mb-4">
-        <label className="font-pixel text-[11px] tracking-widest text-[#5a5a7a] block mb-2">BRANCH</label>
-        <select
+      {/* Branch — custom dark dropdown */}
+      <div className="mb-5">
+        <label className="font-tech text-xs font-semibold text-[#8888aa] block mb-2">Branch</label>
+        <CustomSelect
+          options={BRANCHES}
           value={branch}
-          onChange={(e) => setBranch(e.target.value)}
-          className="w-full px-4 py-3.5 rounded-xl glass border border-white/[0.08] text-white font-tech text-sm focus:outline-none focus:border-violet-500/40 transition-colors bg-[#06060e] appearance-none cursor-pointer"
-        >
-          <option value="" disabled>Select your branch</option>
-          {BRANCHES.map((b) => <option key={b} value={b}>{b}</option>)}
-        </select>
+          onChange={setBranch}
+          placeholder="Select your branch"
+        />
       </div>
 
       {/* Batch year */}
       <div className="mb-7">
-        <label className="font-pixel text-[11px] tracking-widest text-[#5a5a7a] block mb-2">BATCH YEAR (GRADUATION)</label>
+        <label className="font-tech text-xs font-semibold text-[#8888aa] block mb-3">Graduation Year</label>
         <div className="flex gap-2 flex-wrap">
           {BATCH_YEARS.map((y) => (
             <button
               key={y}
               onClick={() => setBatchYear(y)}
-              className="px-3.5 py-2 rounded-lg font-tech text-xs transition-all duration-200"
+              className="px-3.5 py-2 rounded-lg font-tech text-sm transition-all duration-200"
               style={
                 batchYear === y
                   ? { background: "#7c3aed20", border: "1px solid #7c3aed50", color: "#a78bfa" }
-                  : { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", color: "#5a5a7a" }
+                  : { background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", color: "#8888aa" }
               }
             >
               {y}
