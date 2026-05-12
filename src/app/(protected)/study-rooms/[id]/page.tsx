@@ -116,7 +116,25 @@ export default function StudyRoomPage() {
   }, [id, loadRoom]);
 
   const startTimer = async () => {
-    await fetch(`/api/study-rooms/${id}/start`, { method: "POST" });
+    if (!room) return;
+
+    // ── Optimistic update — instant visual feedback ──────────
+    const isPomodoro = room.status === "waiting" || room.status === "break";
+    const mins       = isPomodoro ? room.pomodoro_mins : room.break_mins;
+    const endsAt     = new Date(Date.now() + mins * 60 * 1000).toISOString();
+
+    setRoom((prev) => prev ? {
+      ...prev,
+      status:        isPomodoro ? "pomodoro" : "break",
+      timer_ends_at: endsAt,
+      phase:         isPomodoro ? (prev.phase ?? 0) + 1 : prev.phase,
+    } : prev);
+
+    // Fire API in background — Realtime will confirm
+    fetch(`/api/study-rooms/${id}/start`, { method: "POST" }).catch(() => {
+      // Revert on error
+      loadRoom();
+    });
   };
 
   const leave = async () => {
@@ -163,7 +181,7 @@ export default function StudyRoomPage() {
             <p className="font-tech text-xs text-white/50">🎙 Audio Room (Jitsi — no account needed)</p>
           </div>
           <iframe
-            src={`https://meet.jit.si/nexus-study-${room.jitsi_room_id}#config.startWithAudioMuted=true&config.startWithVideoMuted=true&config.toolbarButtons=["microphone","hangup"]`}
+            src={`https://meet.jit.si/nexus-study-${room.jitsi_room_id}#config.prejoinPageEnabled=false&config.lobby.enabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=true&config.disableModeratorIndicator=true&config.enableNoisyMicDetection=false&config.toolbarButtons=["microphone","hangup","tileview"]`}
             allow="camera; microphone; fullscreen; display-capture; autoplay"
             className="flex-1 w-full border-0"
             style={{ minHeight: 300 }}

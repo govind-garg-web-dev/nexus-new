@@ -94,7 +94,7 @@ export default function ConsultingSessionPage() {
             <p className="font-tech text-xs text-white/50">🎙 Audio — Jitsi Meet</p>
           </div>
           <iframe
-            src={`https://meet.jit.si/${jitsiRoom}#config.startWithAudioMuted=false&config.startWithVideoMuted=true&config.toolbarButtons=["microphone","hangup","desktop"]&config.disableDeepLinking=true`}
+            src={`https://meet.jit.si/${jitsiRoom}#config.prejoinPageEnabled=false&config.lobby.enabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=true&config.disableModeratorIndicator=true&config.disableDeepLinking=true&config.toolbarButtons=["microphone","hangup","desktop"]`}
             allow="camera; microphone; fullscreen; display-capture; autoplay"
             className="flex-1 w-full border-0"
           />
