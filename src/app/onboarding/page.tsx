@@ -32,20 +32,13 @@ const AVATAR_COLORS = [
 ];
 
 // ── Step indicator ─────────────────────────────────────────
-function StepDots({ step }: { step: number }) {
+// OTP step hidden — reactivate by restoring step 1 in OnboardingPage
+function StepDots({ step: _step }: { step: number }) {
   return (
     <div className="flex items-center gap-2 mb-8">
-      {[1, 2].map((s) => (
-        <div key={s} className="flex items-center gap-2">
-          <div
-            className={`h-1.5 rounded-full transition-all duration-400 ${
-              s === step ? "w-8 bg-violet-500" : s < step ? "w-4 bg-violet-500/40" : "w-4 bg-white/10"
-            }`}
-          />
-        </div>
-      ))}
+      <div className="h-1.5 w-8 rounded-full bg-violet-500" />
       <span className="font-pixel text-[11px] text-[#5a5a7a] tracking-widest ml-1">
-        STEP {step} / 2
+        PROFILE SETUP
       </span>
     </div>
   );
@@ -379,8 +372,15 @@ export default function OnboardingPage() {
     });
   }, [router]);
 
+  // OTP_ENABLED = false: skip phone step, go straight to profile.
+  // To re-enable: set OTP_ENABLED = true — PhoneStep and routing are fully preserved.
+  const OTP_ENABLED = false;
+
   const handlePhoneDone = () => setStep(2);
   const handleProfileDone = () => router.replace("/dashboard");
+
+  // When OTP is disabled, always show profile step
+  const activeStep = OTP_ENABLED ? step : 2;
 
   return (
     <div className="relative min-h-screen flex items-center justify-center dot-grid overflow-hidden py-12 px-4">
@@ -413,7 +413,7 @@ export default function OnboardingPage() {
 
         <div className="glass-strong rounded-3xl p-8 border border-white/[0.08]">
           <AnimatePresence mode="wait">
-            {step === 1 ? (
+            {OTP_ENABLED && activeStep === 1 ? (
               <motion.div
                 key="step1"
                 initial={{ opacity: 0, x: 20 }}
