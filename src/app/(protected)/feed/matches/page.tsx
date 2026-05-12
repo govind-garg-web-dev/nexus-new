@@ -44,8 +44,8 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; action: stri
   revealed: {
     label: "Identities revealed",
     color: "#10b981",
-    action: "View Match",
-    href: (id) => `/feed/reveal/${id}`,
+    action: "Open Chat 💬",
+    href: (id) => `/chat/${id}`,
   },
 };
 

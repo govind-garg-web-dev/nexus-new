@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 
 type RevealData = {
   userA: { name: string; email: string; avatarUrl: string | null };
@@ -48,7 +49,7 @@ function CountdownReveal({ onDone }: { onDone: () => void }) {
   );
 }
 
-function RevealScreen({ data, match }: { data: RevealData; match: MatchInfo }) {
+function RevealScreen({ data, match, matchId }: { data: RevealData; match: MatchInfo; matchId: string }) {
   const router = useRouter();
 
   return (
@@ -123,12 +124,12 @@ function RevealScreen({ data, match }: { data: RevealData; match: MatchInfo }) {
         transition={{ delay: 0.5 }}
         className="relative z-10 flex flex-col gap-3 w-full max-w-sm"
       >
-        <button
-          disabled
-          className="w-full py-4 rounded-2xl font-display font-bold text-lg text-white/40 border border-white/10 cursor-not-allowed"
+        <Link
+          href={`/chat/${matchId}`}
+          className="w-full py-4 rounded-2xl btn-primary text-white font-display font-bold text-lg text-center block"
         >
-          Start Chat (coming in Block 4)
-        </button>
+          Start Chatting 💬
+        </Link>
         <button
           onClick={() => router.push("/feed/matches")}
           className="font-tech text-sm text-white/40 hover:text-white transition-colors py-2"
@@ -202,7 +203,7 @@ export default function RevealPage() {
 
   if (counting) return <CountdownReveal onDone={handleCountdownDone} />;
 
-  if (revealed && match) return <RevealScreen data={revealed} match={match} />;
+  if (revealed && match) return <RevealScreen data={revealed} match={match} matchId={matchId} />;
 
   return (
     <div className="text-center p-10">
