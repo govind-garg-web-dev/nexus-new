@@ -9,26 +9,36 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
 
-    const { data: posts } = await supabase
-      .from("micro_consulting")
-      .select("id, subject, difficulty, description, badge_needed, status, poster_id, created_at, expires_at")
-      .eq("status", "open")
-      .gt("expires_at", new Date().toISOString())
-      .neq("poster_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(30);
+    // Fetch others' open posts + my own open posts in parallel
+    const [{ data: otherPosts }, { data: myPosts }] = await Promise.all([
+      supabase
+        .from("micro_consulting")
+        .select("id, subject, difficulty, description, badge_needed, status, poster_id, created_at, expires_at")
+        .eq("status", "open")
+        .gt("expires_at", new Date().toISOString())
+        .neq("poster_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(30),
+      supabase
+        .from("micro_consulting")
+        .select("id, subject, difficulty, description, badge_needed, status, poster_id, created_at, expires_at")
+        .in("status", ["open", "accepted"])
+        .gt("expires_at", new Date().toISOString())
+        .eq("poster_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5),
+    ]);
 
-    // Get poster pseudonyms
-    const posterIds = [...new Set((posts ?? []).map((p) => p.poster_id))];
-    const { data: posters } = await supabase
-      .from("profiles")
-      .select("id, pseudonym, avatar_color, reliability_score")
-      .in("id", posterIds);
+    // Get poster pseudonyms for others' posts
+    const posterIds = [...new Set((otherPosts ?? []).map((p) => p.poster_id))];
+    const { data: posters } = posterIds.length
+      ? await supabase.from("profiles").select("id, pseudonym, avatar_color, reliability_score").in("id", posterIds)
+      : { data: [] };
 
     const posterMap = Object.fromEntries((posters ?? []).map((p) => [p.id, p]));
-    const enriched  = (posts ?? []).map((p) => ({ ...p, poster: posterMap[p.poster_id] ?? null }));
+    const enriched  = (otherPosts ?? []).map((p) => ({ ...p, poster: posterMap[p.poster_id] ?? null }));
 
-    return NextResponse.json({ posts: enriched });
+    return NextResponse.json({ posts: enriched, myPosts: myPosts ?? [] });
   } catch (err) {
     console.error("Consulting GET error:", err);
     return NextResponse.json({ error: "Server error." }, { status: 500 });

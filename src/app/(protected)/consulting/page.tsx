@@ -128,21 +128,34 @@ function PostForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () =
   );
 }
 
+type MyPost = {
+  id: string; subject: string; difficulty: number; description: string;
+  status: string; created_at: string; expires_at: string;
+};
+
 export default function ConsultingPage() {
   const router  = useRouter();
-  const [posts, setPosts]       = useState<Post[]>([]);
-  const [loading, setLoading]   = useState(true);
+  const [posts, setPosts]         = useState<Post[]>([]);
+  const [myPosts, setMyPosts]     = useState<MyPost[]>([]);
+  const [loading, setLoading]     = useState(true);
   const [accepting, setAccepting] = useState<string | null>(null);
-  const [showForm, setShowForm] = useState(false);
-  const [error, setError]       = useState("");
+  const [showForm, setShowForm]   = useState(false);
+  const [error, setError]         = useState("");
+  const [toast, setToast]         = useState("");
 
   const load = async () => {
-    const res = await fetch("/api/consulting");
+    const res  = await fetch("/api/consulting");
     const data = await res.json();
     setPosts(data.posts ?? []);
+    setMyPosts(data.myPosts ?? []);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(""), 3500);
+  };
 
   const accept = async (postId: string) => {
     setAccepting(postId);
@@ -230,8 +243,69 @@ export default function ConsultingPage() {
         </div>
       )}
 
+      {/* My active posts */}
+      {myPosts.length > 0 && (
+        <div className="mb-8">
+          <p className="font-tech text-sm font-semibold text-white/50 mb-3 tracking-wider">YOUR ACTIVE POSTS</p>
+          <div className="space-y-2">
+            {myPosts.map((p) => {
+              const minsLeft = Math.max(0, Math.round((new Date(p.expires_at).getTime() - Date.now()) / 60000));
+              return (
+                <div key={p.id} className="flex items-start gap-4 p-4 rounded-2xl border border-violet-500/20"
+                  style={{ background: "rgba(124,58,237,0.06)" }}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="font-tech text-xs px-2.5 py-0.5 rounded-lg"
+                        style={{ background: "#a855f715", border: "1px solid #a855f730", color: "#a855f7" }}>
+                        {p.subject}
+                      </span>
+                      <span className="font-tech text-xs"
+                        style={{ color: p.status === "accepted" ? "#10b981" : "#f59e0b" }}>
+                        {p.status === "accepted" ? "✓ Someone accepted!" : `⏳ ${minsLeft}m left`}
+                      </span>
+                    </div>
+                    <p className="font-tech text-sm text-white/70 truncate">{p.description}</p>
+                  </div>
+                  {p.status === "accepted" && (
+                    <button onClick={() => router.push(`/consulting/${p.id}`)}
+                      className="shrink-0 px-4 py-2 rounded-xl btn-primary text-white font-display font-semibold text-sm">
+                      Join →
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <AnimatePresence>
-        {showForm && <PostForm onClose={() => setShowForm(false)} onSuccess={() => { setShowForm(false); load(); }} />}
+        {showForm && (
+          <PostForm
+            onClose={() => setShowForm(false)}
+            onSuccess={() => {
+              setShowForm(false);
+              load();
+              showToast("Your blocker is live! Open for 1 hour.");
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 shadow-2xl"
+            style={{ backdropFilter: "blur(12px)" }}
+          >
+            <span className="text-emerald-400 text-lg">✓</span>
+            <span className="font-display font-semibold text-white text-sm">{toast}</span>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );
