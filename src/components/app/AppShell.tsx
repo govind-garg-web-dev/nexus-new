@@ -18,6 +18,7 @@ const NAV = [
   { href: "/dashboard",   label: "Dashboard",     icon: "◈" },
   { href: "/feed",        label: "Merit Feed",    icon: "◆" },
   { href: "/chat",        label: "Chat",          icon: "💬" },
+  { href: "/roommates",   label: "Roommates",     icon: "🏠" },
   { href: "/events",      label: "Events",        icon: "⚡" },
   { href: "/referrals",   label: "Referrals",     icon: "🤝" },
   { href: "/carpool",     label: "Carpool",       icon: "🚗" },
