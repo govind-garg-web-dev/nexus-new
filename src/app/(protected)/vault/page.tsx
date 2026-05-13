@@ -186,6 +186,17 @@ export default function VaultPage() {
     });
   };
 
+  const flag = async (uploadId: string) => {
+    const reason = window.prompt("Why are you flagging this? (e.g. wrong content, incorrect info, spam)");
+    if (!reason?.trim()) return;
+    await fetch("/api/vault/flag", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ uploadId, reason }),
+    });
+    alert("Flagged. Our moderators will review it.");
+  };
+
   const formatSize = (bytes: number | null) => {
     if (!bytes) return "";
     if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
@@ -309,7 +320,7 @@ export default function VaultPage() {
                     )}
                   </div>
 
-                  {/* Vote */}
+                  {/* Vote + Flag */}
                   <div className="flex flex-col items-center gap-1 shrink-0">
                     <button onClick={() => vote(u.id, 1, u.myVote)}
                       className={`px-2 py-1 rounded-lg font-tech text-xs transition-all ${
@@ -322,6 +333,11 @@ export default function VaultPage() {
                         u.myVote === -1 ? "text-red-400 bg-red-500/15 border border-red-500/30" : "text-white/30 hover:text-red-400"
                       }`}>
                       ▼ {u.downvotes}
+                    </button>
+                    <button onClick={() => flag(u.id)}
+                      title="Flag as incorrect or inappropriate"
+                      className="px-2 py-1 rounded-lg font-tech text-xs text-white/20 hover:text-amber-400 transition-all">
+                      ⚑
                     </button>
                   </div>
                 </div>
