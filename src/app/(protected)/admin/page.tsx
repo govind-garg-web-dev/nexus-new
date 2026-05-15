@@ -47,6 +47,106 @@ type CoinConfig    = { action_key: string; coins: number; description: string };
 type CoinPrize     = { id: string; name: string; description: string | null; coin_cost: number; available: boolean; stock: number | null };
 type Tab = "stats" | "users" | "campuses" | "societies" | "referrals" | "waitlist" | "coins";
 
+// ── Editable prize card ──────────────────────────────────────
+function PrizeCard({ prize, onSave }: { prize: CoinPrize; onSave: (u: Partial<CoinPrize>) => Promise<void> }) {
+  const [editing, setEditing] = useState(false);
+  const [name, setName]       = useState(prize.name);
+  const [desc, setDesc]       = useState(prize.description ?? "");
+  const [cost, setCost]       = useState(prize.coin_cost);
+  const [stock, setStock]     = useState<string>(prize.stock !== null ? String(prize.stock) : "");
+  const [saving, setSaving]   = useState(false);
+
+  const save = async () => {
+    setSaving(true);
+    await onSave({
+      name,
+      description: desc || null,
+      coin_cost:   cost,
+      stock:       stock !== "" ? parseInt(stock) : null,
+    });
+    setSaving(false);
+    setEditing(false);
+  };
+
+  const toggleAvailable = async () => {
+    await onSave({ available: !prize.available });
+  };
+
+  return (
+    <div className="rounded-2xl border border-amber-500/15 p-5" style={{ background: "rgba(245,158,11,0.05)" }}>
+      {editing ? (
+        <div className="space-y-2 mb-3">
+          <input value={name} onChange={(e) => setName(e.target.value)}
+            className="w-full px-3 py-2 rounded-lg border border-white/10 text-white font-display font-bold text-sm focus:outline-none focus:border-amber-500/40"
+            style={{ background: "rgba(255,255,255,0.05)" }} />
+          <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={2}
+            placeholder="Description"
+            className="w-full px-3 py-2 rounded-lg border border-white/10 text-white font-tech text-xs resize-none focus:outline-none focus:border-amber-500/40"
+            style={{ background: "rgba(255,255,255,0.05)" }} />
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="font-tech text-[10px] text-white/40 block mb-1">🪙 Coin cost</label>
+              <input type="number" value={cost} onChange={(e) => setCost(parseInt(e.target.value) || 0)}
+                className="w-full px-3 py-2 rounded-lg border border-white/10 text-amber-300 font-display font-bold text-sm focus:outline-none focus:border-amber-500/40"
+                style={{ background: "rgba(255,255,255,0.05)" }} />
+            </div>
+            <div>
+              <label className="font-tech text-[10px] text-white/40 block mb-1">Stock (blank = ∞)</label>
+              <input type="number" value={stock} onChange={(e) => setStock(e.target.value)}
+                placeholder="unlimited"
+                className="w-full px-3 py-2 rounded-lg border border-white/10 text-white font-tech text-sm focus:outline-none focus:border-amber-500/40"
+                style={{ background: "rgba(255,255,255,0.05)" }} />
+            </div>
+          </div>
+          <div className="flex gap-2 pt-1">
+            <button onClick={() => setEditing(false)} className="flex-1 py-2 rounded-lg border border-white/10 font-tech text-xs text-white/40 hover:text-white">Cancel</button>
+            <button onClick={save} disabled={saving}
+              className="flex-1 py-2 rounded-lg bg-amber-500/15 border border-amber-500/25 text-amber-300 font-display font-semibold text-xs hover:bg-amber-500/20 disabled:opacity-40">
+              {saving ? "Saving…" : "Save"}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <p className="font-display font-bold text-white text-sm">{prize.name}</p>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="text-base">🪙</span>
+              <span className="font-display font-bold text-amber-300 text-base">{prize.coin_cost}</span>
+              <button onClick={() => setEditing(true)}
+                className="ml-1 font-pixel text-white/20 hover:text-amber-400 transition-colors text-sm" title="Edit">
+                ✏
+              </button>
+            </div>
+          </div>
+          {prize.description && <p className="font-tech text-xs text-white/50 mb-3">{prize.description}</p>}
+        </>
+      )}
+
+      {/* Bottom bar: status + toggle */}
+      <div className="flex items-center gap-2 mt-1">
+        <span className={`font-tech text-xs font-semibold ${prize.available ? "text-emerald-400" : "text-white/30"}`}>
+          {prize.available ? "Available" : "Disabled"}
+        </span>
+        {prize.stock !== null && !editing && (
+          <span className="font-tech text-xs text-white/30">· Stock: {prize.stock}</span>
+        )}
+        {/* Toggle switch */}
+        <button
+          onClick={toggleAvailable}
+          className="ml-auto relative w-10 h-5 rounded-full transition-colors duration-200 focus:outline-none shrink-0"
+          style={{ background: prize.available ? "#10b981" : "rgba(255,255,255,0.12)" }}
+        >
+          <span
+            className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200"
+            style={{ transform: prize.available ? "translateX(20px)" : "translateX(0)" }}
+          />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPage() {
   const [tab, setTab]           = useState<Tab>("stats");
   const [error, setError]       = useState("");
@@ -547,39 +647,22 @@ export default function AdminPage() {
           <div>
             <p className="font-display font-bold text-white text-xl mb-2">Prize Catalog</p>
             <p className="font-tech text-sm text-white/40 mb-5">
-              What users can redeem their coins for. You can edit these any time.
+              Edit name, description, cost and stock inline. Toggle to enable/disable.
             </p>
             <div className="grid sm:grid-cols-2 gap-3">
               {coinPrizes.map((p) => (
-                <div key={p.id} className="rounded-2xl border border-amber-500/15 p-5"
-                  style={{ background: "rgba(245,158,11,0.05)" }}>
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <p className="font-display font-bold text-white text-sm">{p.name}</p>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <span className="text-base">🪙</span>
-                      <span className="font-display font-bold text-amber-300 text-base">{p.coin_cost}</span>
-                    </div>
-                  </div>
-                  {p.description && <p className="font-tech text-xs text-white/50 mb-2">{p.description}</p>}
-                  <div className="flex items-center gap-2">
-                    <span className={`font-pixel text-[10px] tracking-widest ${p.available ? "text-emerald-400" : "text-red-400"}`}>
-                      {p.available ? "AVAILABLE" : "UNAVAILABLE"}
-                    </span>
-                    {p.stock !== null && <span className="font-tech text-xs text-white/30">Stock: {p.stock}</span>}
-                    <button
-                      onClick={async () => {
-                        await fetch("/api/admin/coins", {
-                          method: "POST", headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ type: "prize", prizeId: p.id, prizeData: { available: !p.available } }),
-                        });
-                        loadCoins();
-                      }}
-                      className="ml-auto font-tech text-xs text-white/40 hover:text-white transition-colors"
-                    >
-                      Toggle
-                    </button>
-                  </div>
-                </div>
+                <PrizeCard
+                  key={p.id}
+                  prize={p}
+                  onSave={async (updates) => {
+                    await fetch("/api/admin/coins", {
+                      method: "POST", headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ type: "prize", prizeId: p.id, prizeData: updates }),
+                    });
+                    loadCoins();
+                    showToast("Prize updated!");
+                  }}
+                />
               ))}
             </div>
           </div>

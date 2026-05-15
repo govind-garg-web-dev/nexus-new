@@ -39,16 +39,8 @@ export default function Navbar() {
           ))}
         </nav>
 
-        {/* CTAs */}
+        {/* CTA — waitlist only, no sign-in shown publicly */}
         <div className="hidden md:flex items-center gap-3">
-          <motion.a
-            href="/sign-in"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            className="px-5 py-2.5 rounded-xl glass border border-white/[0.1] hover:border-white/[0.2] text-white/80 hover:text-white text-sm font-display font-semibold transition-all duration-200"
-          >
-            Sign In
-          </motion.a>
           <motion.a
             href="#waitlist"
             whileHover={{ scale: 1.03 }}
@@ -89,13 +81,6 @@ export default function Navbar() {
               {l.label}
             </a>
           ))}
-          <a
-            href="/sign-in"
-            onClick={() => setMobileOpen(false)}
-            className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl glass border border-white/[0.12] text-white text-sm font-display font-semibold"
-          >
-            Sign In
-          </a>
           <a
             href="#waitlist"
             onClick={() => setMobileOpen(false)}

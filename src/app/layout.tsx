@@ -35,6 +35,11 @@ export const metadata: Metadata = {
   manifest:    "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "MatchBatch" },
   other:       { "mobile-web-app-capable": "yes" },
+  icons: {
+    icon:   [{ url: "/logoooo.png" }],
+    apple:  [{ url: "/logoooo.png" }],
+    shortcut: "/logoooo.png",
+  },
 };
 
 export const viewport: Viewport = {
