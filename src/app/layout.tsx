@@ -29,11 +29,11 @@ const dancingScript = Dancing_Script({
 });
 
 export const metadata: Metadata = {
-  title:       "NullSpace — The Anonymous Merit Network for Indian Campuses",
+  title:       "MatchBatch — The Anonymous Merit Network for Indian Campuses",
   description: "Find teammates, roommates, mentors, and opportunities — based on verified skills, not who you already know.",
   keywords:    ["campus network", "student platform", "hackathon team", "college app India", "anonymous networking"],
   manifest:    "/manifest.webmanifest",
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "NullSpace" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "MatchBatch" },
   other:       { "mobile-web-app-capable": "yes" },
 };
 

@@ -363,7 +363,7 @@ function ProfileStep({ userEmail, onDone }: { userEmail: string; onDone: () => v
         disabled={!pseudonym || !college || !branch || loading}
         className="w-full py-3.5 rounded-xl btn-primary text-white font-display font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        {loading ? "Setting up your profile…" : "Enter NullSpace →"}
+        {loading ? "Setting up your profile…" : "Enter MatchBatch →"}
       </motion.button>
     </div>
   );
@@ -399,7 +399,7 @@ function IdVerificationStep({ onDone }: { onDone: () => void }) {
         <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
           onClick={onDone}
           className="w-full py-3.5 rounded-xl btn-primary text-white font-display font-bold text-base">
-          Enter NullSpace →
+          Enter MatchBatch →
         </motion.button>
       </div>
     );
@@ -455,7 +455,7 @@ function DisclosuresStep({ onDone }: { onDone: () => void }) {
       key:  "chat" as const,
       icon: "💬",
       title: "Chat messages are server-logged",
-      body:  "All messages sent through NullSpace are stored on our servers for safety auditing and moderation. You were told this at sign-up. This is not end-to-end encrypted.",
+      body:  "All messages sent through MatchBatch are stored on our servers for safety auditing and moderation. You were told this at sign-up. This is not end-to-end encrypted.",
     },
     {
       key:  "crisis" as const,
@@ -466,8 +466,8 @@ function DisclosuresStep({ onDone }: { onDone: () => void }) {
     {
       key:  "therapy" as const,
       icon: "💛",
-      title: "NullSpace is not a counseling service",
-      body:  "The Peer Support Circles and other community features are peer-to-peer. NullSpace does not provide professional mental health support. If you need professional help, please contact iCall (9152987821).",
+      title: "MatchBatch is not a counseling service",
+      body:  "The Peer Support Circles and other community features are peer-to-peer. MatchBatch does not provide professional mental health support. If you need professional help, please contact iCall (9152987821).",
     },
   ];
 
@@ -475,7 +475,7 @@ function DisclosuresStep({ onDone }: { onDone: () => void }) {
     <div>
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-1">
-          <img src="/logo.png" alt="NullSpace" className="h-6 w-auto" />
+          <img src="/logo.png" alt="MatchBatch" className="h-6 w-auto" />
         </div>
         <h2 className="font-display font-bold text-white text-2xl mb-1 mt-6">Before you begin.</h2>
         <p className="font-tech text-sm text-[#8888aa] leading-relaxed">
@@ -580,7 +580,7 @@ export default function OnboardingPage() {
       <div className="relative z-10 w-full max-w-sm">
         {/* Logo top */}
         <div className="flex items-center gap-2 mb-6">
-          <img src="/logo.png" alt="NullSpace" className="h-6 w-auto" />
+          <img src="/logo.png" alt="MatchBatch" className="h-6 w-auto" />
         </div>
 
         <div className="glass-strong rounded-3xl p-8 border border-white/[0.08]">

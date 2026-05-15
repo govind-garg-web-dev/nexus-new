@@ -428,7 +428,7 @@ export default function AdminPage() {
             </div>
             <a
               href={`data:text/csv;charset=utf-8,Phone,Source,Joined\n${waitlist.map((e) => `+91${e.phone},${e.source},${new Date(e.created_at).toLocaleString("en-IN")}`).join("\n")}`}
-              download="nullspace-waitlist.csv"
+              download="matchbatch-waitlist.csv"
               className="px-4 py-2 rounded-xl border border-white/10 font-tech text-sm text-white/60 hover:text-white hover:border-white/20 transition-all"
               style={{ background: "rgba(255,255,255,0.02)" }}
             >

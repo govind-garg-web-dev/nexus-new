@@ -34,7 +34,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
         <a href="#" className="group">
-          <img src="/logo.png" alt="NullSpace" className="h-20 w-auto group-hover:opacity-90 transition-opacity" />
+          <img src="/logo.png" alt="MatchBatch" className="h-20 w-auto group-hover:opacity-90 transition-opacity" />
         </a>
 
         {/* Desktop nav */}

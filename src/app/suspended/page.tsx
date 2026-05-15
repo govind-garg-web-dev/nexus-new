@@ -12,7 +12,7 @@ export default function SuspendedPage() {
         </p>
         <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5 text-left mb-6">
           <p className="font-tech text-sm text-amber-200 leading-relaxed">
-            <span className="font-bold">To appeal:</span> Contact the NullSpace team at your college with your registered email.
+            <span className="font-bold">To appeal:</span> Contact the MatchBatch team at your college with your registered email.
             Appeals are reviewed within 72 hours.
           </p>
         </div>

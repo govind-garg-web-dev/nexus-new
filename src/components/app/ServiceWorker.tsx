@@ -9,12 +9,12 @@ export default function ServiceWorker() {
     navigator.serviceWorker
       .register("/sw.js", { scope: "/" })
       .then((reg) => {
-        console.log("[NullSpace SW] Registered:", reg.scope);
+        console.log("[MatchBatch SW] Registered:", reg.scope);
 
         // Check for updates every hour
         setInterval(() => reg.update(), 3600000);
       })
-      .catch((err) => console.warn("[NullSpace SW] Registration failed:", err));
+      .catch((err) => console.warn("[MatchBatch SW] Registration failed:", err));
   }, []);
 
   return null;

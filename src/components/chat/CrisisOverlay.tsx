@@ -109,7 +109,7 @@ export default function CrisisOverlay({ onDismiss, onSafe, onNotSafe }: Props) {
               </div>
 
               <p className="font-tech text-xs text-white/30 text-center mb-4">
-                NullSpace is not a counseling service. These are professional helplines.
+                MatchBatch is not a counseling service. These are professional helplines.
               </p>
 
               <button

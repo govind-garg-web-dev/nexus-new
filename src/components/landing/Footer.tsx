@@ -31,7 +31,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="mb-4">
-              <img src="/logo.png" alt="NullSpace" className="h-7 w-auto" />
+              <img src="/logo.png" alt="MatchBatch" className="h-7 w-auto" />
             </div>
             <p className="text-[#5a5a7a] text-sm leading-relaxed font-tech mb-5">
               The anonymous, merit-based network for Indian college students.
@@ -74,7 +74,7 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="border-t border-white/[0.05] pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="font-tech text-[11px] text-[#3a3a5a] tracking-wide">
-            © 2026 NullSpace. Built for India&apos;s students.
+            © 2026 MatchBatch. Built for India&apos;s students.
           </p>
           <div className="flex items-center gap-1.5">
             <span className="font-pixel text-[11px] text-[#3a3a5a] tracking-widest">CRAFTED WITH</span>
