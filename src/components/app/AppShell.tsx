@@ -17,6 +17,10 @@ type Profile = {
 
 const NAV = [
   { href: "/dashboard",   label: "Dashboard",     icon: "◈" },
+  { href: "/pro",         label: "Pro ✨",         icon: "👑" },
+  { href: "/pro/courses", label: "Courses",        icon: "📖" },
+  { href: "/pro/practice",label: "Practice",       icon: "🎯" },
+  { href: "/pro/sessions",label: "Live Sessions",  icon: "🗣" },
   { href: "/feed",        label: "Merit Feed",    icon: "◆" },
   { href: "/chat",        label: "Chat",          icon: "💬" },
   { href: "/roommates",   label: "Roommates",     icon: "🏠" },
