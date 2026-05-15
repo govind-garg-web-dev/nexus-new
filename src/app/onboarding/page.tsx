@@ -475,7 +475,7 @@ function DisclosuresStep({ onDone }: { onDone: () => void }) {
     <div>
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-1">
-          <img src="/logo.png" alt="MatchBatch" className="h-60 w-auto" />
+          <img src="/logo.png" alt="MatchBatch" className="h-18 w-auto" />
         </div>
         <h2 className="font-display font-bold text-white text-2xl mb-1 mt-6">Before you begin.</h2>
         <p className="font-tech text-sm text-[#8888aa] leading-relaxed">
@@ -580,7 +580,7 @@ export default function OnboardingPage() {
       <div className="relative z-10 w-full max-w-sm">
         {/* Logo top */}
         <div className="flex items-center gap-2 mb-6">
-          <img src="/logo.png" alt="MatchBatch" className="h-60 w-auto" />
+          <img src="/logo.png" alt="MatchBatch" className="h-18 w-auto" />
         </div>
 
         <div className="glass-strong rounded-3xl p-8 border border-white/[0.08]">
