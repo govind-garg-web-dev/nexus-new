@@ -12,7 +12,7 @@
   <!-- Background rounded square -->
   <rect width="64" height="64" rx="14" fill="#0d0d1a"/>
   <!-- {0} symbol -->
-  <text x="6" y="46" font-family="'Space Mono','Courier New',monospace" font-size="36" font-weight="700" fill="url(#iconGrad)" filter="url(#iglow)">{0}</text>
+  <text x="6" y="46" font-family="'Courier New', Courier, monospace" font-size="36" font-weight="700" fill="url(#iconGrad)" filter="url(#iglow)">{0}</text>
   <!-- small underscore cursor -->
   <rect x="44" y="48" width="12" height="3" rx="1" fill="url(#iconGrad)" opacity="0.8"/>
 </svg>
