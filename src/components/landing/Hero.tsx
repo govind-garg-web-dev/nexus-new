@@ -176,7 +176,7 @@ export default function Hero() {
       />
 
       {/* ── Content grid ── */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-28 pb-20 w-full grid lg:grid-cols-2 gap-12 items-center min-h-screen">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 pt-10 pb-20 w-full grid lg:grid-cols-2 gap-12 items-center min-h-screen">
         {/* Left: copy */}
         <div>
           {/* Status pill */}

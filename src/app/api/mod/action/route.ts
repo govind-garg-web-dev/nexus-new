@@ -113,6 +113,37 @@ export async function POST(request: Request) {
       }
     }
 
+    // Society event approval — action: 'approve' (featured?), 'approve_standard', 'reject'
+    if (type === "society_event") {
+      const body = await (async () => { try { return await request.clone().json(); } catch { return {}; } })();
+      const featured = body?.featured ?? false;
+
+      if (action === "reject") {
+        await admin.from("events").update({ approval_status: "rejected" }).eq("id", itemId);
+      } else {
+        // approve — set status + optional featured
+        await admin.from("events").update({
+          approval_status: "approved",
+          is_featured:     !!featured,
+        }).eq("id", itemId);
+
+        // Award coins to the society leader
+        const { data: ev } = await admin.from("events").select("society_id").eq("id", itemId).single();
+        if (ev?.society_id) {
+          const { data: society } = await admin.from("societies").select("leader_id").eq("id", ev.society_id).single();
+          if (society?.leader_id) {
+            const { data: coinCfg } = await admin.from("coin_config").select("coins").eq("action_key", "event_approved").single();
+            await admin.rpc("award_coins", {
+              p_user_id:   society.leader_id,
+              p_amount:    coinCfg?.coins ?? 50,
+              p_reason:    "event_approved",
+              p_reference: itemId,
+            });
+          }
+        }
+      }
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("Mod action error:", err);

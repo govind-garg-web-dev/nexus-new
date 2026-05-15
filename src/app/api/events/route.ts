@@ -36,29 +36,44 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
 
-    // Check admin role
-    const { data: userData } = await supabase
-      .from("users").select("role").eq("id", user.id).single();
-    if (!userData || !["admin", "moderator"].includes(userData.role)) {
-      return NextResponse.json({ error: "Admin access required." }, { status: 403 });
-    }
-
     const body = await request.json();
-    const { title, description, type, organizer, deadline, eventDate, link, tags, isFeatured } = body;
+    const { title, description, type, organizer, deadline, eventDate, link, tags, isFeatured,
+            societyId, isCharged, ticketPrice } = body;
     if (!title || !description) {
       return NextResponse.json({ error: "title and description are required." }, { status: 400 });
     }
 
+    // Check permission: admin/mod OR verified society leader
+    const { data: userData } = await supabase.from("users").select("role").eq("id", user.id).single();
+    const isAdmin = userData && ["admin","moderator"].includes(userData.role);
+
+    // If from a society, verify the user is that society's leader
+    let approvalStatus = "approved"; // admin posts are auto-approved
+    if (societyId && !isAdmin) {
+      const { data: society } = await supabase
+        .from("societies").select("leader_id, verified").eq("id", societyId).single();
+      if (!society || society.leader_id !== user.id || !society.verified) {
+        return NextResponse.json({ error: "Only verified society leaders can submit events." }, { status: 403 });
+      }
+      approvalStatus = "pending"; // society events need mod approval
+    } else if (!isAdmin) {
+      return NextResponse.json({ error: "Admin access required." }, { status: 403 });
+    }
+
     const admin = createAdminClient();
     const { data: event } = await admin.from("events").insert({
-      posted_by:   user.id,
+      posted_by:       user.id,
       title,
       description,
-      type:        type        ?? "other",
-      organizer:   organizer   ?? null,
-      deadline:    deadline    ?? null,
-      event_date:  eventDate   ?? null,
-      link:        link        ?? null,
+      type:            type        ?? "other",
+      organizer:       organizer   ?? null,
+      deadline:        deadline    ?? null,
+      event_date:      eventDate   ?? null,
+      link:            link        ?? null,
+      society_id:      societyId   ?? null,
+      is_charged:      !!isCharged,
+      ticket_price:    ticketPrice ?? null,
+      approval_status: approvalStatus,
       tags:        tags        ?? [],
       is_featured: isFeatured  ?? false,
     }).select("id").single();

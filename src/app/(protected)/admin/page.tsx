@@ -43,7 +43,9 @@ function StatCard({ label, value, color }: { label: string; value: number; color
 
 // ── Main page ───────────────────────────────────────────────
 type WaitlistEntry = { id: string; phone: string; source: string; created_at: string };
-type Tab = "stats" | "users" | "campuses" | "societies" | "referrals" | "waitlist";
+type CoinConfig    = { action_key: string; coins: number; description: string };
+type CoinPrize     = { id: string; name: string; description: string | null; coin_cost: number; available: boolean; stock: number | null };
+type Tab = "stats" | "users" | "campuses" | "societies" | "referrals" | "waitlist" | "coins";
 
 export default function AdminPage() {
   const [tab, setTab]           = useState<Tab>("stats");
@@ -73,6 +75,12 @@ export default function AdminPage() {
 
   // Waitlist
   const [waitlist, setWaitlist]   = useState<WaitlistEntry[]>([]);
+
+  // Coins
+  const [coinConfig, setCoinConfig]   = useState<CoinConfig[]>([]);
+  const [coinPrizes, setCoinPrizes]   = useState<CoinPrize[]>([]);
+  const [editingCoin, setEditingCoin] = useState<Record<string, number>>({});
+  const [savingCoin, setSavingCoin]   = useState<string | null>(null);
 
   const loadStats = useCallback(async () => {
     const res = await fetch("/api/admin/stats");
@@ -111,6 +119,17 @@ export default function AdminPage() {
     setWaitlist((await res.json()).entries ?? []);
   }, []);
 
+  const loadCoins = useCallback(async () => {
+    const res = await fetch("/api/admin/coins");
+    if (!res.ok) return;
+    const d = await res.json();
+    setCoinConfig(d.config ?? []);
+    setCoinPrizes(d.prizes ?? []);
+    const edits: Record<string, number> = {};
+    (d.config ?? []).forEach((c: CoinConfig) => { edits[c.action_key] = c.coins; });
+    setEditingCoin(edits);
+  }, []);
+
   useEffect(() => {
     if (tab === "stats")     loadStats();
     if (tab === "users")     loadUsers();
@@ -118,7 +137,8 @@ export default function AdminPage() {
     if (tab === "societies") loadSocieties();
     if (tab === "referrals") loadReferrals();
     if (tab === "waitlist")  loadWaitlist();
-  }, [tab, loadStats, loadUsers, loadCampuses, loadSocieties, loadReferrals, loadWaitlist]);
+    if (tab === "coins")     loadCoins();
+  }, [tab, loadStats, loadUsers, loadCampuses, loadSocieties, loadReferrals, loadWaitlist, loadCoins]);
 
   const updateRole = async (userId: string, role: string) => {
     setActing(userId);
@@ -185,6 +205,7 @@ export default function AdminPage() {
     { key: "societies", label: "Society Verify",icon: "✦" },
     { key: "referrals", label: "Recruiter Tier",icon: "💼" },
     { key: "waitlist",  label: "Waitlist",       icon: "📱" },
+    { key: "coins",     label: "Coins & Rewards",icon: "🪙" },
   ];
 
   return (
@@ -471,6 +492,97 @@ export default function AdminPage() {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── Coins & Rewards ── */}
+      {tab === "coins" && (
+        <div className="space-y-8">
+          {/* Coin config */}
+          <div>
+            <p className="font-display font-bold text-white text-xl mb-2">Coins per Action</p>
+            <p className="font-tech text-sm text-white/40 mb-5">
+              Adjust how many coins users earn for each action. Changes take effect immediately.
+            </p>
+            <div className="space-y-3">
+              {coinConfig.map((c) => (
+                <div key={c.action_key} className="flex items-center gap-4 p-4 rounded-2xl border border-white/8"
+                  style={{ background: "rgba(255,255,255,0.02)" }}>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display font-semibold text-white text-sm">{c.description}</p>
+                    <p className="font-tech text-xs text-white/40">{c.action_key}</p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="text-lg">🪙</span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={editingCoin[c.action_key] ?? c.coins}
+                      onChange={(e) => setEditingCoin((prev) => ({ ...prev, [c.action_key]: parseInt(e.target.value) || 0 }))}
+                      className="w-20 px-3 py-2 rounded-xl border border-white/10 text-white font-tech text-sm text-center focus:outline-none focus:border-amber-500/40 bg-transparent"
+                    />
+                    <button
+                      onClick={async () => {
+                        setSavingCoin(c.action_key);
+                        await fetch("/api/admin/coins", {
+                          method: "POST", headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ type: "config", actionKey: c.action_key, coins: editingCoin[c.action_key] ?? c.coins }),
+                        });
+                        setSavingCoin(null);
+                        loadCoins();
+                        showToast("Saved!");
+                      }}
+                      disabled={savingCoin === c.action_key}
+                      className="px-4 py-2 rounded-xl btn-primary text-white font-display font-semibold text-xs disabled:opacity-40"
+                    >
+                      {savingCoin === c.action_key ? "…" : "Save"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Prizes */}
+          <div>
+            <p className="font-display font-bold text-white text-xl mb-2">Prize Catalog</p>
+            <p className="font-tech text-sm text-white/40 mb-5">
+              What users can redeem their coins for. You can edit these any time.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {coinPrizes.map((p) => (
+                <div key={p.id} className="rounded-2xl border border-amber-500/15 p-5"
+                  style={{ background: "rgba(245,158,11,0.05)" }}>
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <p className="font-display font-bold text-white text-sm">{p.name}</p>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <span className="text-base">🪙</span>
+                      <span className="font-display font-bold text-amber-300 text-base">{p.coin_cost}</span>
+                    </div>
+                  </div>
+                  {p.description && <p className="font-tech text-xs text-white/50 mb-2">{p.description}</p>}
+                  <div className="flex items-center gap-2">
+                    <span className={`font-pixel text-[10px] tracking-widest ${p.available ? "text-emerald-400" : "text-red-400"}`}>
+                      {p.available ? "AVAILABLE" : "UNAVAILABLE"}
+                    </span>
+                    {p.stock !== null && <span className="font-tech text-xs text-white/30">Stock: {p.stock}</span>}
+                    <button
+                      onClick={async () => {
+                        await fetch("/api/admin/coins", {
+                          method: "POST", headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ type: "prize", prizeId: p.id, prizeData: { available: !p.available } }),
+                        });
+                        loadCoins();
+                      }}
+                      className="ml-auto font-tech text-xs text-white/40 hover:text-white transition-colors"
+                    >
+                      Toggle
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 

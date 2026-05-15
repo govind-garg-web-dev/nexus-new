@@ -12,6 +12,7 @@ type Profile = {
   avatar_color:      string;
   reliability_score: number;
   college:           string;
+  coins_balance?:    number;
 } | null;
 
 const NAV = [
@@ -135,6 +136,17 @@ export default function AppShell({ children, profile }: { children: React.ReactN
         {/* User card */}
         {profile && (
           <div className="px-3 py-4 border-t border-white/5 space-y-3">
+            {/* Coin wallet */}
+            <div className="flex items-center justify-between px-2 py-1.5 rounded-xl"
+              style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.18)" }}>
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm">🪙</span>
+                <span className="font-display font-bold text-amber-300 text-sm">
+                  {(profile.coins_balance ?? 0).toLocaleString()}
+                </span>
+              </div>
+              <span className="font-tech text-[10px] text-amber-500/70 tracking-wider">COINS</span>
+            </div>
             <ScoreBadge score={profile.reliability_score} />
             <div className="flex items-center gap-2.5">
               <div

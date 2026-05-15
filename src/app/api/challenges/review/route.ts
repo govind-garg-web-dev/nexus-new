@@ -98,6 +98,17 @@ export async function POST(request: Request) {
       throw reviewError;
     }
 
+    // Award coins to the reviewer
+    const { data: reviewCoinConfig } = await admin
+      .from("coin_config").select("coins").eq("action_key", "challenge_review").single();
+    const reviewCoins = reviewCoinConfig?.coins ?? 5;
+    await admin.rpc("award_coins", {
+      p_user_id:   user.id,
+      p_amount:    reviewCoins,
+      p_reason:    "challenge_review",
+      p_reference: submissionId,
+    });
+
     // Count approvals / rejections
     const { data: reviews } = await admin
       .from("peer_reviews").select("verdict").eq("submission_id", submissionId);

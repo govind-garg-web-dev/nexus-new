@@ -26,13 +26,24 @@ export async function POST(_req: Request, { params }: Params) {
     const admin = createAdminClient();
     await admin.from("micro_consulting").update({ status: "completed" }).eq("id", id);
 
-    // +3 reliability to solver for completing a session
     if (post.solver_id) {
+      // +3 reliability score
       await admin.rpc("apply_score_event", {
         p_user_id:      post.solver_id,
         p_delta:        3,
         p_reason:       "collaboration_complete",
         p_reference_id: id,
+      });
+
+      // Award coins from config
+      const { data: configRow } = await admin
+        .from("coin_config").select("coins").eq("action_key", "consulting_help").single();
+      const coins = configRow?.coins ?? 20;
+      await admin.rpc("award_coins", {
+        p_user_id:   post.solver_id,
+        p_amount:    coins,
+        p_reason:    "consulting_help",
+        p_reference: id,
       });
     }
 

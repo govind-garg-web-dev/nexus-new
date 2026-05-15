@@ -15,7 +15,7 @@ export default function SocietyDetailPage() {
   const [verifyToast, setVerifyToast] = useState("");
   const [polls, setPolls]           = useState<Poll[]>([]);
   const [recruitment, setRecruitment] = useState<Recruitment[]>([]);
-  const [tab, setTab]               = useState<"polls"|"recruitment">("polls");
+  const [tab, setTab]               = useState<"polls"|"recruitment"|"events">("polls");
   const [loading, setLoading]       = useState(true);
   const [showPollForm, setShowPollForm]   = useState(false);
   const [showRecruitForm, setShowRecruitForm] = useState(false);
@@ -23,6 +23,13 @@ export default function SocietyDetailPage() {
   const [applyText, setApplyText]   = useState("");
   const [pollForm, setPollForm]     = useState({ question: "", options: ["", ""], endsAt: "" });
   const [recruitForm, setRecruitForm] = useState({ title: "", description: "", criteria: "", deadline: "" });
+  const [eventForm, setEventForm]   = useState({
+    title: "", description: "", type: "other", organizer: "",
+    deadline: "", eventDate: "", link: "", tags: "",
+    isCharged: false, ticketPrice: "",
+  });
+  const [submittingEvent, setSubmittingEvent] = useState(false);
+  const [showEventForm, setShowEventForm]     = useState(false);
   const [toast, setToast]           = useState("");
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
@@ -96,6 +103,34 @@ export default function SocietyDetailPage() {
     if (res.ok) { load(); showToast("Application submitted anonymously!"); }
   };
 
+  const submitEvent = async () => {
+    if (!eventForm.title || !eventForm.description) return;
+    setSubmittingEvent(true);
+    const res = await fetch("/api/events", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title:       eventForm.title,
+        description: eventForm.description,
+        type:        eventForm.type,
+        organizer:   society?.name ?? "",
+        deadline:    eventForm.deadline    || null,
+        eventDate:   eventForm.eventDate   || null,
+        link:        eventForm.link        || null,
+        tags:        eventForm.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        isFeatured:  false,
+        societyId:   id,
+        isCharged:   eventForm.isCharged,
+        ticketPrice: eventForm.isCharged && eventForm.ticketPrice ? parseInt(eventForm.ticketPrice) : null,
+      }),
+    });
+    setSubmittingEvent(false);
+    if (res.ok) {
+      setShowEventForm(false);
+      setEventForm({ title: "", description: "", type: "other", organizer: "", deadline: "", eventDate: "", link: "", tags: "", isCharged: false, ticketPrice: "" });
+      showToast("Event submitted for mod review! It'll appear on the Events Hub once approved.");
+    }
+  };
+
   if (loading) return <div className="flex justify-center py-20"><div className="w-8 h-8 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" /></div>;
 
   return (
@@ -131,7 +166,7 @@ export default function SocietyDetailPage() {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6">
-        {(["polls","recruitment"] as const).map((t) => (
+        {(["polls","recruitment","events"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`px-5 py-2.5 rounded-xl font-tech text-sm capitalize transition-all ${tab === t ? "btn-primary text-white" : "border border-white/10 text-white/50 hover:text-white"}`}
             style={{ background: tab === t ? undefined : "rgba(255,255,255,0.02)" }}>
@@ -254,6 +289,95 @@ export default function SocietyDetailPage() {
             ))}
             {recruitment.length === 0 && <p className="font-tech text-sm text-white/40 text-center py-8">No open recruitment.</p>}
           </div>
+        </div>
+      )}
+
+      {/* ── Events tab ── */}
+      {tab === "events" && (
+        <div>
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="font-display font-semibold text-white text-base">Submit an Event</p>
+              <p className="font-tech text-xs text-white/40 mt-0.5">
+                Submitted events go to mod review. If approved, they appear on the public Events Hub.
+              </p>
+            </div>
+            <button onClick={() => setShowEventForm(!showEventForm)}
+              className="px-4 py-2 rounded-xl btn-primary text-white font-display font-semibold text-sm">
+              + Submit Event
+            </button>
+          </div>
+
+          {showEventForm && (
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+              className="rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5 mb-5">
+              <div className="space-y-3">
+                <input value={eventForm.title} onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })}
+                  placeholder="Event title *"
+                  className="w-full px-4 py-3 rounded-xl border border-white/10 text-white placeholder-white/20 font-tech text-sm focus:outline-none focus:border-violet-500/40" style={{ background: "rgba(255,255,255,0.03)" }} />
+                <textarea value={eventForm.description} onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })}
+                  placeholder="Describe the event *" rows={3}
+                  className="w-full px-4 py-3 rounded-xl border border-white/10 text-white placeholder-white/20 font-tech text-sm resize-none focus:outline-none focus:border-violet-500/40" style={{ background: "rgba(255,255,255,0.03)" }} />
+                <div className="grid grid-cols-2 gap-3">
+                  {([["Event Date", "eventDate"], ["Registration Deadline", "deadline"]] as [string, "eventDate"|"deadline"][]).map(([label, key]) => (
+                    <div key={key}>
+                      <label className="font-tech text-xs text-white/40 block mb-1">{label}</label>
+                      <input type="date" value={eventForm[key]}
+                        onChange={(e) => setEventForm({ ...eventForm, [key]: e.target.value })}
+                        className="w-full px-3 py-2.5 rounded-xl border border-white/10 text-white font-tech text-sm focus:outline-none bg-surface" />
+                    </div>
+                  ))}
+                </div>
+                <input value={eventForm.link} onChange={(e) => setEventForm({ ...eventForm, link: e.target.value })}
+                  placeholder="Registration link (optional)"
+                  className="w-full px-4 py-3 rounded-xl border border-white/10 text-white placeholder-white/20 font-tech text-sm focus:outline-none focus:border-violet-500/40" style={{ background: "rgba(255,255,255,0.03)" }} />
+                <input value={eventForm.tags} onChange={(e) => setEventForm({ ...eventForm, tags: e.target.value })}
+                  placeholder="Tags, comma-separated (e.g. Tech, Workshop)"
+                  className="w-full px-4 py-3 rounded-xl border border-white/10 text-white placeholder-white/20 font-tech text-sm focus:outline-none focus:border-violet-500/40" style={{ background: "rgba(255,255,255,0.03)" }} />
+
+                {/* Charged event toggle */}
+                <div className="flex items-center gap-3 p-4 rounded-xl border border-white/8" style={{ background: "rgba(255,255,255,0.02)" }}>
+                  <input type="checkbox" id="isCharged" checked={eventForm.isCharged}
+                    onChange={(e) => setEventForm({ ...eventForm, isCharged: e.target.checked })}
+                    className="w-4 h-4 rounded accent-violet-500" />
+                  <label htmlFor="isCharged" className="font-tech text-sm text-white/70 cursor-pointer flex-1">
+                    This is a paid/ticketed event
+                  </label>
+                </div>
+                {eventForm.isCharged && (
+                  <input type="number" value={eventForm.ticketPrice}
+                    onChange={(e) => setEventForm({ ...eventForm, ticketPrice: e.target.value })}
+                    placeholder="Ticket price (₹)"
+                    className="w-full px-4 py-3 rounded-xl border border-white/10 text-white placeholder-white/20 font-tech text-sm focus:outline-none focus:border-violet-500/40" style={{ background: "rgba(255,255,255,0.03)" }} />
+                )}
+
+                <div className="rounded-xl p-3 border border-amber-500/15 bg-amber-500/5">
+                  <p className="font-tech text-xs text-amber-300 leading-relaxed">
+                    ⚡ Your event will be reviewed by our moderators before appearing publicly.
+                    They can approve as Featured or Standard. Approval usually takes under 24 hours.
+                  </p>
+                </div>
+
+                <div className="flex gap-3">
+                  <button onClick={() => setShowEventForm(false)} className="flex-1 py-2.5 rounded-xl border border-white/10 font-tech text-sm text-white/40">Cancel</button>
+                  <button onClick={submitEvent} disabled={!eventForm.title || !eventForm.description || submittingEvent}
+                    className="flex-1 py-2.5 rounded-xl btn-primary text-white font-display font-semibold text-sm disabled:opacity-40">
+                    {submittingEvent ? "Submitting…" : "Submit for Review →"}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {!showEventForm && (
+            <div className="rounded-2xl border border-white/8 p-8 text-center" style={{ background: "rgba(255,255,255,0.02)" }}>
+              <p className="text-3xl mb-2">📅</p>
+              <p className="font-display font-semibold text-white/60 text-lg mb-1">Submit your society events</p>
+              <p className="font-tech text-sm text-white/40">
+                Approved events appear on the public Events Hub. Mods can mark them as Featured.
+              </p>
+            </div>
+          )}
         </div>
       )}
 

@@ -11,12 +11,14 @@ type Report = {
 type Confession = { id: string; content: string; toxicity_score: number | null; created_at: string; };
 type IdRequest  = { id: string; user_id: string; photo_url: string; created_at: string; };
 
+type SocietyEvent = { id: string; title: string; description: string; is_charged: boolean; ticket_price: number | null; deadline: string | null; link: string | null; created_at: string; societies: { name: string } | null };
 type Queue = {
   reports: Report[];
   flaggedMessages: { id: string; content: string; flag_reason: string; created_at: string }[];
   pendingConfessions: Confession[];
   vaultFlags: { id: string; reason: string; created_at: string; vault_uploads: { title: string; file_url: string } | null }[];
   idRequests: IdRequest[];
+  societyEvents: SocietyEvent[];
 };
 
 const SLA_MINS = 30;
@@ -36,7 +38,7 @@ function SlaChip({ createdAt }: { createdAt: string }) {
 export default function ModDashboardPage() {
   const [queue, setQueue]   = useState<Queue | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab]       = useState<"reports"|"messages"|"confessions"|"vault"|"ids">("reports");
+  const [tab, setTab]       = useState<"reports"|"messages"|"confessions"|"vault"|"ids"|"events">("reports");
   const [acting, setActing] = useState<string | null>(null);
   const [error, setError]   = useState("");
 
@@ -60,11 +62,12 @@ export default function ModDashboardPage() {
   };
 
   const tabs = [
-    { key: "reports",     label: "Reports",      count: queue?.reports.length ?? 0 },
-    { key: "messages",    label: "Flagged Msgs",  count: queue?.flaggedMessages.length ?? 0 },
-    { key: "confessions", label: "Confessions",  count: queue?.pendingConfessions.length ?? 0 },
-    { key: "vault",       label: "Vault Flags",  count: queue?.vaultFlags.length ?? 0 },
-    { key: "ids",         label: "ID Verify",    count: queue?.idRequests.length ?? 0 },
+    { key: "reports",     label: "Reports",        count: queue?.reports.length ?? 0 },
+    { key: "messages",    label: "Flagged Msgs",   count: queue?.flaggedMessages.length ?? 0 },
+    { key: "confessions", label: "Confessions",    count: queue?.pendingConfessions.length ?? 0 },
+    { key: "vault",       label: "Vault Flags",    count: queue?.vaultFlags.length ?? 0 },
+    { key: "ids",         label: "ID Verify",      count: queue?.idRequests.length ?? 0 },
+    { key: "events",      label: "Society Events", count: queue?.societyEvents?.length ?? 0 },
   ];
 
   const totalPending = tabs.reduce((s, t) => s + t.count, 0);
@@ -255,6 +258,52 @@ export default function ModDashboardPage() {
             </motion.div>
           ))}
           {tab === "ids" && (queue?.idRequests ?? []).length === 0 && <Empty label="No ID verification requests" />}
+
+          {/* Society Events */}
+          {tab === "events" && (queue?.societyEvents ?? []).map((e, i) => (
+            <motion.div key={e.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+              className="rounded-2xl border border-white/8 p-5" style={{ background: "rgba(255,255,255,0.02)" }}>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <p className="font-display font-bold text-white text-base">{e.title}</p>
+                    {e.is_charged && (
+                      <span className="font-pixel text-[10px] text-amber-400 tracking-widest px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
+                        ₹{e.ticket_price ?? "?"} TICKET
+                      </span>
+                    )}
+                  </div>
+                  <p className="font-tech text-xs text-violet-400 mb-2">by {(e.societies as { name: string } | null)?.name ?? "Unknown society"}</p>
+                  <p className="font-tech text-sm text-white/60 leading-relaxed mb-2 line-clamp-3">{e.description}</p>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {e.deadline && <span className="font-tech text-xs text-amber-400">Deadline: {new Date(e.deadline).toLocaleDateString("en-IN")}</span>}
+                    {e.link && <a href={e.link} target="_blank" rel="noopener noreferrer" className="font-tech text-xs text-violet-400 hover:text-violet-300">Link ↗</a>}
+                    <SlaChip createdAt={e.created_at} />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-2 shrink-0">
+                  <button onClick={() => act("society_event", e.id, "reject")} disabled={acting === e.id}
+                    className="px-3 py-2 rounded-xl border border-red-500/20 text-red-400 font-tech text-xs hover:bg-red-500/10 disabled:opacity-40">
+                    Reject
+                  </button>
+                  <button onClick={() => { act("society_event", e.id, "approve"); }} disabled={acting === e.id}
+                    className="px-3 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 font-display font-semibold text-xs hover:bg-emerald-500/15 disabled:opacity-40">
+                    {acting === e.id ? "…" : "Approve →"}
+                  </button>
+                  <button onClick={async () => {
+                    setActing(e.id);
+                    await fetch("/api/mod/action", { method: "POST", headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ type: "society_event", itemId: e.id, action: "approve", featured: true }) });
+                    setActing(null); load();
+                  }} disabled={acting === e.id}
+                    className="px-3 py-2 rounded-xl bg-violet-500/10 border border-violet-500/25 text-violet-300 font-display font-semibold text-xs hover:bg-violet-500/15 disabled:opacity-40">
+                    {acting === e.id ? "…" : "⭐ Featured"}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+          {tab === "events" && (queue?.societyEvents ?? []).length === 0 && <Empty label="No pending society events" />}
         </div>
       )}
     </div>

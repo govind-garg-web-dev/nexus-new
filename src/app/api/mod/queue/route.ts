@@ -24,6 +24,7 @@ export async function GET() {
       { data: pendingConfessions },
       { data: vaultFlags },
       { data: idRequests },
+      { data: societyEvents },
     ] = await Promise.all([
       // User reports
       admin.from("report_log")
@@ -59,6 +60,13 @@ export async function GET() {
         .eq("status", "pending")
         .order("created_at", { ascending: true })
         .limit(30),
+
+      // Society event submissions awaiting approval
+      admin.from("events")
+        .select("id, title, description, type, is_charged, ticket_price, deadline, link, created_at, societies(name)")
+        .eq("approval_status", "pending")
+        .order("created_at", { ascending: true })
+        .limit(30),
     ]);
 
     // Get profile info for reported users
@@ -70,10 +78,11 @@ export async function GET() {
 
     return NextResponse.json({
       reports: (reports ?? []).map((r) => ({ ...r, reportedProfile: profileMap[r.reported_id] ?? null })),
-      flaggedMessages: flaggedMessages ?? [],
+      flaggedMessages:    flaggedMessages    ?? [],
       pendingConfessions: pendingConfessions ?? [],
-      vaultFlags: vaultFlags ?? [],
-      idRequests: idRequests ?? [],
+      vaultFlags:         vaultFlags         ?? [],
+      idRequests:         idRequests         ?? [],
+      societyEvents:      societyEvents      ?? [],
     });
   } catch (err) {
     console.error("Mod queue error:", err);

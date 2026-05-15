@@ -15,7 +15,7 @@ export async function GET() {
 
     const { data: listings } = await supabase
       .from("pg_listings")
-      .select("id, title, location, area, rent_per_month, slots_available, gender_pref, amenities, description, poster_id, created_at")
+      .select("id, title, location, area, rent_per_month, slots_available, gender_pref, amenities, description, photo_urls, poster_id, created_at")
       .eq("active", true)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -38,7 +38,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { title, location, area, rentPerMonth, slotsAvailable, genderPref, amenities, description } = await request.json();
+    const { title, location, area, rentPerMonth, slotsAvailable, genderPref, amenities, description, photoUrls } = await request.json();
     if (!title || !location || !rentPerMonth) {
       return NextResponse.json({ error: "title, location, and rentPerMonth are required." }, { status: 400 });
     }
@@ -57,6 +57,7 @@ export async function POST(request: Request) {
       slots_available: slotsAvailable  ?? 1,
       gender_pref:     genderPref      ?? "any",
       amenities:       amenities       ?? [],
+      photo_urls:      photoUrls       ?? [],
       description:     description?.trim() ?? null,
     }).select("id").single();
 

@@ -8,7 +8,7 @@ type Listing = {
   id: string; title: string; location: string; area: string | null;
   rent_per_month: number; slots_available: number; gender_pref: string;
   amenities: string[]; description: string | null; created_at: string;
-  poster_id: string;
+  photo_urls: string[]; poster_id: string;
   poster: { pseudonym: string; avatar_color: string } | null;
 };
 
@@ -32,6 +32,8 @@ export default function PGListingsPage() {
     title: "", location: "", area: "", rentPerMonth: "",
     slotsAvailable: "1", genderPref: "any", amenities: [] as string[], description: "",
   });
+  const [photos, setPhotos]       = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
 
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(""), 3000); };
 
@@ -55,6 +57,21 @@ export default function PGListingsPage() {
   const submit = async () => {
     if (!form.title || !form.location || !form.rentPerMonth) return;
     setSubmitting(true);
+
+    // Upload photos first if any
+    let photoUrls: string[] = [];
+    if (photos.length > 0) {
+      setUploading(true);
+      const fd = new FormData();
+      photos.forEach((f) => fd.append("photos", f));
+      const upRes = await fetch("/api/roommates/pg/photos", { method: "POST", body: fd });
+      if (upRes.ok) {
+        const d = await upRes.json();
+        photoUrls = d.urls ?? [];
+      }
+      setUploading(false);
+    }
+
     const res = await fetch("/api/roommates/pg", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -62,6 +79,7 @@ export default function PGListingsPage() {
         rentPerMonth: parseInt(form.rentPerMonth), slotsAvailable: parseInt(form.slotsAvailable),
         genderPref: form.genderPref, amenities: form.amenities,
         description: form.description || null,
+        photoUrls,
       }),
     });
     setSubmitting(false);
@@ -146,11 +164,49 @@ export default function PGListingsPage() {
               <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
                 placeholder="Any extra details — house rules, utilities included, distance from college…"
                 rows={2} className="w-full px-4 py-3 rounded-xl border border-white/10 text-white placeholder-white/20 font-tech text-sm resize-none focus:outline-none focus:border-violet-500/40" style={{ background: "rgba(255,255,255,0.03)" }} />
+
+              {/* Photo upload — optional */}
+              <div>
+                <label className="font-tech text-xs text-white/50 font-semibold block mb-2">
+                  Photos <span className="text-white/30 font-normal">(optional, up to 4)</span>
+                </label>
+                <div
+                  onClick={() => document.getElementById("pg-photos-input")?.click()}
+                  className="rounded-xl border-2 border-dashed border-white/10 hover:border-violet-500/30 px-4 py-3 cursor-pointer transition-colors"
+                  style={{ background: "rgba(255,255,255,0.02)" }}
+                >
+                  <input
+                    id="pg-photos-input"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files ?? []).slice(0, 4);
+                      setPhotos(files);
+                    }}
+                  />
+                  {photos.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {photos.map((f, i) => (
+                        <span key={i} className="font-tech text-xs text-white/60 px-2 py-1 rounded bg-white/5">
+                          {f.name.slice(0, 20)}…
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="font-tech text-xs text-white/30 text-center">
+                      📷 Click to add photos — JPEG, PNG · max 5MB each
+                    </p>
+                  )}
+                </div>
+              </div>
+
               <div className="flex gap-3">
                 <button onClick={() => setShowForm(false)} className="flex-1 py-2.5 rounded-xl border border-white/10 font-tech text-sm text-white/40">Cancel</button>
                 <button onClick={submit} disabled={!form.title || !form.location || !form.rentPerMonth || submitting}
                   className="flex-1 py-2.5 rounded-xl btn-primary text-white font-display font-semibold text-sm disabled:opacity-40">
-                  {submitting ? "Posting…" : "Post Listing →"}
+                  {uploading ? "Uploading photos…" : submitting ? "Posting…" : "Post Listing →"}
                 </button>
               </div>
             </div>
@@ -171,7 +227,18 @@ export default function PGListingsPage() {
         <div className="space-y-4">
           {listings.map((l, i) => (
             <motion.div key={l.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-              className="rounded-2xl border border-white/8 p-5" style={{ background: "rgba(255,255,255,0.02)" }}>
+              className="rounded-2xl border border-white/8 overflow-hidden" style={{ background: "rgba(255,255,255,0.02)" }}>
+              {/* Photo strip */}
+              {l.photo_urls?.length > 0 && (
+                <div className="flex gap-1 h-40 overflow-hidden">
+                  {l.photo_urls.slice(0, 3).map((url, pi) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img key={pi} src={url} alt="PG photo"
+                      className={`object-cover h-full ${l.photo_urls.length === 1 ? "w-full" : pi === 0 ? "w-1/2" : "flex-1"}`} />
+                  ))}
+                </div>
+              )}
+              <div className="p-5">
               <div className="flex items-start justify-between gap-4 mb-3">
                 <div className="min-w-0">
                   <h3 className="font-display font-bold text-white text-base mb-1">{l.title}</h3>
@@ -215,6 +282,7 @@ export default function PGListingsPage() {
                   Express Interest →
                 </button>
               </div>
+              </div>{/* close p-5 */}
             </motion.div>
           ))}
         </div>
