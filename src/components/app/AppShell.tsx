@@ -97,9 +97,8 @@ export default function AppShell({ children, profile }: { children: React.ReactN
       <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-56 border-r border-white/6 bg-[#08080f] z-40">
         {/* Logo */}
         <div className="px-4 py-4 border-b border-white/5">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <img src="/logo-icon.svg" alt="NullSpace" className="w-8 h-8 shrink-0" />
-            <img src="/logo.svg" alt="NullSpace" className="h-6 w-auto" />
+          <Link href="/dashboard">
+            <img src="/logo.png" alt="NullSpace" className="h-7 w-auto" />
           </Link>
         </div>
 
@@ -161,9 +160,8 @@ export default function AppShell({ children, profile }: { children: React.ReactN
 
       {/* ── Mobile topbar ── */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass border-b border-white/6 px-4 py-3 flex items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <img src="/logo-icon.svg" alt="NullSpace" className="w-7 h-7 shrink-0" />
-          <img src="/logo.svg" alt="NullSpace" className="h-5 w-auto" />
+        <Link href="/dashboard">
+          <img src="/logo.png" alt="NullSpace" className="h-6 w-auto" />
         </Link>
         <button onClick={() => setOpen(!open)} className="p-1">
           <span className="font-pixel text-white text-lg">{open ? "✕" : "☰"}</span>

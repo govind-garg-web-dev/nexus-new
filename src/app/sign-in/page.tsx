@@ -64,8 +64,7 @@ function SignInContent() {
         <div className="glass-strong rounded-3xl p-8 border border-white/[0.08]">
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <img src="/logo-icon.svg" alt="NullSpace" className="w-14 h-14 mb-3" />
-            <img src="/logo.svg" alt="NullSpace" className="h-8 w-auto mb-2" />
+            <img src="/logo.png" alt="NullSpace" className="h-10 w-auto mb-4" />
             <p className="font-tech text-[11px] text-[#5a5a7a] tracking-[0.2em]">
               CAMPUS VERIFIED · MERIT FIRST
             </p>

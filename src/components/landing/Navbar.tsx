@@ -33,9 +33,8 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
-        <a href="#" className="flex items-center gap-2 group">
-          <img src="/logo-icon.svg" alt="NullSpace" className="w-8 h-8 shrink-0" />
-          <img src="/logo.svg" alt="NullSpace" className="h-6 w-auto group-hover:opacity-90 transition-opacity" />
+        <a href="#" className="group">
+          <img src="/logo.png" alt="NullSpace" className="h-7 w-auto group-hover:opacity-90 transition-opacity" />
         </a>
 
         {/* Desktop nav */}

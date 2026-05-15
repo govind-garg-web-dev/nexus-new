@@ -30,9 +30,8 @@ export default function Footer() {
         <div className="grid lg:grid-cols-4 gap-12 mb-14">
           {/* Brand */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <img src="/logo-icon.svg" alt="NullSpace" className="w-8 h-8 shrink-0" />
-              <img src="/logo.svg" alt="NullSpace" className="h-6 w-auto" />
+            <div className="mb-4">
+              <img src="/logo.png" alt="NullSpace" className="h-7 w-auto" />
             </div>
             <p className="text-[#5a5a7a] text-sm leading-relaxed font-tech mb-5">
               The anonymous, merit-based network for Indian college students.
