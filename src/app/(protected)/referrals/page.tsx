@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 type Post = {
   id: string; company: string; role: string; slots: number;
   criteria: string; deadline: string | null; is_alumni: boolean;
+  recruiter_tier: boolean; company_verified: boolean;
   myStatus: string | null; created_at: string;
   poster: { pseudonym: string; avatar_color: string; college: string } | null;
 };
@@ -170,9 +171,20 @@ export default function ReferralsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {posts.map((p, i) => (
+          {/* Recruiter tier posts first */}
+          {posts.filter((p) => p.recruiter_tier).length > 0 && (
+            <div className="flex items-center gap-2 mb-2">
+              <span className="font-pixel text-[10px] text-amber-400 tracking-widest">VERIFIED RECRUITERS</span>
+              <div className="flex-1 h-px bg-amber-500/20" />
+            </div>
+          )}
+          {[...posts.filter((p) => p.recruiter_tier), ...posts.filter((p) => !p.recruiter_tier)].map((p, i) => (
             <motion.div key={p.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-              className="rounded-2xl border border-white/8 p-5" style={{ background: "rgba(255,255,255,0.02)" }}>
+              className="rounded-2xl border p-5"
+              style={{
+                background: p.recruiter_tier ? "rgba(245,158,11,0.05)" : "rgba(255,255,255,0.02)",
+                borderColor: p.recruiter_tier ? "rgba(245,158,11,0.2)" : "rgba(255,255,255,0.08)",
+              }}>
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl border border-white/10 flex items-center justify-center text-2xl shrink-0" style={{ background: "rgba(255,255,255,0.04)" }}>
                   💼
@@ -181,7 +193,12 @@ export default function ReferralsPage() {
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
                     <h3 className="font-display font-bold text-white text-base">{p.company}</h3>
                     <span className="font-tech text-sm text-white/60">— {p.role}</span>
-                    {p.is_alumni && <span className="font-pixel text-[10px] text-emerald-400 tracking-widest">ALUMNI</span>}
+                    {p.recruiter_tier && (
+                      <span className="font-pixel text-[10px] text-amber-400 tracking-widest px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
+                        ✓ VERIFIED RECRUITER
+                      </span>
+                    )}
+                    {p.is_alumni && !p.recruiter_tier && <span className="font-pixel text-[10px] text-emerald-400 tracking-widest">ALUMNI</span>}
                   </div>
                   <p className="font-tech text-sm text-white/60 leading-relaxed mb-3">{p.criteria}</p>
                   <div className="flex items-center gap-4 flex-wrap text-xs">

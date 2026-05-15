@@ -34,6 +34,7 @@ const NAV = [
   { href: "/leaderboard",  label: "Leaderboard",   icon: "🏆" },
   { href: "/co-founder",   label: "Co-Founder",    icon: "🚀" },
   { href: "/mod",          label: "Mod Dashboard", icon: "🛡" },
+  { href: "/admin",        label: "Admin Panel",   icon: "⚙" },
   { href: "/profile",      label: "My Profile",    icon: "❋" },
 ];
 

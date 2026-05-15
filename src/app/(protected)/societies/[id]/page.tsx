@@ -10,7 +10,9 @@ type Recruitment = { id: string; title: string; description: string; criteria: s
 export default function SocietyDetailPage() {
   const { id }    = useParams<{ id: string }>();
   const router    = useRouter();
-  const [society, setSociety]       = useState<{ name: string; bio: string | null; verified: boolean; isLeader: boolean } | null>(null);
+  const [society, setSociety]       = useState<{ name: string; bio: string | null; verified: boolean; isLeader: boolean; verifyRequested?: boolean } | null>(null);
+  const [requestingVerify, setRequestingVerify] = useState(false);
+  const [verifyToast, setVerifyToast] = useState("");
   const [polls, setPolls]           = useState<Poll[]>([]);
   const [recruitment, setRecruitment] = useState<Recruitment[]>([]);
   const [tab, setTab]               = useState<"polls"|"recruitment">("polls");
@@ -50,6 +52,15 @@ export default function SocietyDetailPage() {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ optionIndex }),
     });
+  };
+
+  const requestVerification = async () => {
+    setRequestingVerify(true);
+    const res  = await fetch(`/api/societies/${id}/verify-request`, { method: "POST" });
+    const data = await res.json();
+    setRequestingVerify(false);
+    setVerifyToast(data.message ?? data.error ?? "Request submitted");
+    setTimeout(() => setVerifyToast(""), 4000);
   };
 
   const createPoll = async () => {
@@ -92,11 +103,29 @@ export default function SocietyDetailPage() {
       <button onClick={() => router.back()} className="font-tech text-sm text-white/40 hover:text-white mb-8 flex items-center gap-2">← Back</button>
       {society && (
         <div className="mb-8">
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="font-display font-bold text-white text-3xl">{society.name}</h1>
-            {society.verified && <span className="font-pixel text-[10px] text-emerald-400 tracking-widest">VERIFIED</span>}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <h1 className="font-display font-bold text-white text-3xl">{society.name}</h1>
+                {society.verified && (
+                  <span className="font-pixel text-[10px] text-emerald-400 tracking-widest px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+                    ✓ VERIFIED
+                  </span>
+                )}
+              </div>
+              {society.bio && <p className="font-tech text-sm text-white/50">{society.bio}</p>}
+            </div>
+            {/* Verification request — only for leader of unverified society */}
+            {society.isLeader && !society.verified && (
+              <button onClick={requestVerification} disabled={requestingVerify}
+                className="shrink-0 px-4 py-2 rounded-xl border border-violet-500/25 bg-violet-500/8 text-violet-300 font-display font-semibold text-sm hover:bg-violet-500/12 transition-colors disabled:opacity-40">
+                {requestingVerify ? "Requesting…" : "Request Verification →"}
+              </button>
+            )}
           </div>
-          {society.bio && <p className="font-tech text-sm text-white/50">{society.bio}</p>}
+          {verifyToast && (
+            <p className="font-tech text-xs text-emerald-400 mt-3">{verifyToast}</p>
+          )}
         </div>
       )}
 
