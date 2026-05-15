@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const NPS_KEY     = "nexus_nps_completed";
-const NPS_SHOWN   = "nexus_nps_last_shown";
+const NPS_KEY     = "nullspace_nps_completed";
+const NPS_SHOWN   = "nullspace_nps_last_shown";
 const TRIGGER_DAYS = 3;    // show after 3 days
 const REPEAT_DAYS  = 30;   // don't show again for 30 days
 
@@ -26,7 +26,7 @@ export default function NpsPrompt({ userId }: { userId: string }) {
     }
 
     // Check account age — only show to users who've been around a bit
-    const accountCreated = localStorage.getItem("nexus_created_at");
+    const accountCreated = localStorage.getItem("nullspace_created_at");
     if (accountCreated) {
       const daysSinceCreation = (Date.now() - parseInt(accountCreated)) / 86400000;
       if (daysSinceCreation < TRIGGER_DAYS) return;
@@ -80,7 +80,7 @@ export default function NpsPrompt({ userId }: { userId: string }) {
             <div className="p-6 text-center">
               <div className="text-3xl mb-2">🙏</div>
               <p className="font-display font-bold text-white text-base">Thank you!</p>
-              <p className="font-tech text-xs text-white/50 mt-1">Your feedback helps shape Nexus.</p>
+              <p className="font-tech text-xs text-white/50 mt-1">Your feedback helps shape NullSpace.</p>
             </div>
           ) : (
             <div className="p-5">
@@ -90,7 +90,7 @@ export default function NpsPrompt({ userId }: { userId: string }) {
                   <p className="font-display font-bold text-white text-sm">Quick question</p>
                   <p className="font-tech text-xs text-white/50 mt-0.5">
                     {phase === "rating"
-                      ? "How likely are you to recommend Nexus to a friend at your campus?"
+                      ? "How likely are you to recommend NullSpace to a friend at your campus?"
                       : "Anything specific you'd like to share?"}
                   </p>
                 </div>

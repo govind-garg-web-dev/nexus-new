@@ -1,5 +1,5 @@
-// Nexus Service Worker — offline shell + push notifications
-const CACHE_NAME = "nexus-v1";
+// NullSpace Service Worker — offline shell + push notifications
+const CACHE_NAME = "nullspace-v1";
 const OFFLINE_URL = "/offline";
 
 const PRECACHE = [
@@ -53,7 +53,7 @@ self.addEventListener("fetch", (event) => {
 // ── Push notifications ──────────────────────────────────────
 self.addEventListener("push", (event) => {
   if (!event.data) return;
-  let payload = { title: "Nexus", body: "You have a new notification.", icon: "/icon-192.png", url: "/dashboard" };
+  let payload = { title: "NullSpace", body: "You have a new notification.", icon: "/icon-192.png", url: "/dashboard" };
   try { payload = { ...payload, ...event.data.json() }; } catch {}
 
   event.waitUntil(
@@ -63,7 +63,7 @@ self.addEventListener("push", (event) => {
       badge:   "/icon-192.png",
       vibrate: [200, 100, 200],
       data:    { url: payload.url },
-      actions: [{ action: "open", title: "Open Nexus" }],
+      actions: [{ action: "open", title: "Open NullSpace" }],
     })
   );
 });

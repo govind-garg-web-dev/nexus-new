@@ -64,14 +64,9 @@ function SignInContent() {
         <div className="glass-strong rounded-3xl p-8 border border-white/[0.08]">
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div className="relative w-12 h-12 mb-4">
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 glow-violet" />
-              <div className="relative w-full h-full rounded-xl flex items-center justify-center">
-                <span className="font-pixel text-white text-xl">N</span>
-              </div>
-            </div>
-            <h1 className="font-display font-bold text-white text-2xl tracking-tight">NEXUS</h1>
-            <p className="font-tech text-[11px] text-[#5a5a7a] tracking-[0.2em] mt-1">
+            <img src="/logo-icon.svg" alt="NullSpace" className="w-14 h-14 mb-3" />
+            <img src="/logo.svg" alt="NullSpace" className="h-8 w-auto mb-2" />
+            <p className="font-tech text-[11px] text-[#5a5a7a] tracking-[0.2em]">
               CAMPUS VERIFIED · MERIT FIRST
             </p>
           </div>

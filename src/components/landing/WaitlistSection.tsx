@@ -87,7 +87,7 @@ export default function WaitlistSection() {
             </h2>
 
             <p className="text-[#7a7a9a] text-lg mb-10 max-w-md mx-auto">
-              We&apos;re launching on one campus first. Get early access and help shape what Nexus becomes.
+              We&apos;re launching on one campus first. Get early access and help shape what NullSpace becomes.
             </p>
 
             {/* Input */}

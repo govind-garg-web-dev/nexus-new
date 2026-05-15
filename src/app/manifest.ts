@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name:             "Nexus — Campus Network",
-    short_name:       "Nexus",
+    name:             "NullSpace — Campus Network",
+    short_name:       "NullSpace",
     description:      "The anonymous, merit-based network for Indian college students.",
     start_url:        "/dashboard",
     display:          "standalone",

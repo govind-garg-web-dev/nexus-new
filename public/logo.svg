@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 110" fill="none">
+  <defs>
+    <linearGradient id="nsGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="#06B6D4"/>
+      <stop offset="40%"  stop-color="#818CF8"/>
+      <stop offset="100%" stop-color="#C026D3"/>
+    </linearGradient>
+    <filter id="glow" x="-10%" y="-20%" width="120%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- N -->
+  <text x="12" y="82" font-family="'Space Mono','Courier New',monospace" font-size="72" font-weight="700" fill="url(#nsGrad)" filter="url(#glow)" letter-spacing="2">N</text>
+  <!-- {0} -->
+  <text x="70" y="82" font-family="'Space Mono','Courier New',monospace" font-size="72" font-weight="700" fill="url(#nsGrad)" filter="url(#glow)" letter-spacing="1">{0}</text>
+  <!-- ll -->
+  <text x="210" y="82" font-family="'Space Mono','Courier New',monospace" font-size="72" font-weight="700" fill="url(#nsGrad)" filter="url(#glow)" letter-spacing="2">ll</text>
+  <!-- Space (with circuit o) -->
+  <text x="280" y="82" font-family="'Space Mono','Courier New',monospace" font-size="72" font-weight="700" fill="url(#nsGrad)" filter="url(#glow)" letter-spacing="2"> S</text>
+  <!-- circuit o node -->
+  <circle cx="406" cy="60" r="10" fill="url(#nsGrad)" filter="url(#glow)"/>
+  <circle cx="406" cy="60" r="4"  fill="#06060e"/>
+  <line x1="416" y1="60" x2="440" y2="60" stroke="url(#nsGrad)" stroke-width="3" filter="url(#glow)"/>
+  <circle cx="440" cy="60" r="6"  fill="url(#nsGrad)" filter="url(#glow)"/>
+  <circle cx="440" cy="60" r="2.5" fill="#06060e"/>
+  <!-- ace_ -->
+  <text x="450" y="82" font-family="'Space Mono','Courier New',monospace" font-size="72" font-weight="700" fill="url(#nsGrad)" filter="url(#glow)" letter-spacing="2">ace_</text>
+</svg>

@@ -204,7 +204,7 @@ export default function Hero() {
             transition={{ delay: 0.28, duration: 0.7 }}
             className="text-[#7a7a9a] text-lg leading-relaxed max-w-[480px] mb-10"
           >
-            Nexus is the anonymous, skill-verified network for Indian college students.
+            NullSpace is the anonymous, skill-verified network for Indian college students.
             Find teammates, roommates, and referrals based on{" "}
             <em className="font-script text-violet-300 not-italic text-xl">merit</em>
             , not who you know.
@@ -256,7 +256,7 @@ export default function Hero() {
             transition={{ delay: 0.52 }}
             className="font-tech text-xs text-[#4a4a6a] mt-3"
           >
-            Already on Nexus?{" "}
+            Already on NullSpace?{" "}
             <a
               href="/sign-in"
               className="text-violet-400 hover:text-violet-300 transition-colors underline underline-offset-2 decoration-violet-500/30"
