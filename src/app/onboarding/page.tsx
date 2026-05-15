@@ -445,10 +445,93 @@ function IdVerificationStep({ onDone }: { onDone: () => void }) {
   );
 }
 
+// ── Step 0: Safety disclosures ─────────────────────────────
+function DisclosuresStep({ onDone }: { onDone: () => void }) {
+  const [checks, setChecks] = useState({ chat: false, crisis: false, therapy: false });
+  const allChecked = checks.chat && checks.crisis && checks.therapy;
+
+  const DISCLOSURES = [
+    {
+      key:  "chat" as const,
+      icon: "💬",
+      title: "Chat messages are server-logged",
+      body:  "All messages sent through Nexus are stored on our servers for safety auditing and moderation. You were told this at sign-up. This is not end-to-end encrypted.",
+    },
+    {
+      key:  "crisis" as const,
+      icon: "🆘",
+      title: "Crisis detection runs on all content",
+      body:  "We scan messages and posts for keywords that suggest someone may be in distress. If triggered, we show helpline numbers. We never block the message.",
+    },
+    {
+      key:  "therapy" as const,
+      icon: "💛",
+      title: "Nexus is not a counseling service",
+      body:  "The Peer Support Circles and other community features are peer-to-peer. Nexus does not provide professional mental health support. If you need professional help, please contact iCall (9152987821).",
+    },
+  ];
+
+  return (
+    <div>
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-blue-600 flex items-center justify-center glow-sm-violet shrink-0">
+            <span className="font-pixel text-white text-sm">N</span>
+          </div>
+          <span className="font-display font-bold text-white tracking-tight">NEXUS</span>
+        </div>
+        <h2 className="font-display font-bold text-white text-2xl mb-1 mt-6">Before you begin.</h2>
+        <p className="font-tech text-sm text-[#8888aa] leading-relaxed">
+          Please read and acknowledge these three things. They affect how the platform works.
+        </p>
+      </div>
+
+      <div className="space-y-4 mb-8">
+        {DISCLOSURES.map((d) => (
+          <button
+            key={d.key}
+            onClick={() => setChecks((prev) => ({ ...prev, [d.key]: !prev[d.key] }))}
+            className={`w-full text-left p-4 rounded-2xl border transition-all ${
+              checks[d.key]
+                ? "border-violet-500/40 bg-violet-500/8"
+                : "border-white/10 hover:border-white/20"
+            }`}
+            style={{ background: checks[d.key] ? undefined : "rgba(255,255,255,0.02)" }}
+          >
+            <div className="flex items-start gap-3">
+              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                checks[d.key] ? "border-violet-500 bg-violet-500" : "border-white/30"
+              }`}>
+                {checks[d.key] && <span className="text-white text-xs font-bold">✓</span>}
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span>{d.icon}</span>
+                  <p className="font-display font-semibold text-white text-sm">{d.title}</p>
+                </div>
+                <p className="font-tech text-xs text-white/50 leading-relaxed">{d.body}</p>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <motion.button
+        whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+        onClick={onDone}
+        disabled={!allChecked}
+        className="w-full py-3.5 rounded-xl btn-primary text-white font-display font-bold text-base disabled:opacity-30 disabled:cursor-not-allowed"
+      >
+        {allChecked ? "I understand, continue →" : "Please acknowledge all three above"}
+      </motion.button>
+    </div>
+  );
+}
+
 // ── Main onboarding page ───────────────────────────────────
 export default function OnboardingPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0); // 0 = disclosures, 1 = OTP (skipped), 2 = profile, 3 = ID
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
@@ -463,18 +546,19 @@ export default function OnboardingPage() {
   // To re-enable: set OTP_ENABLED = true — PhoneStep and routing are fully preserved.
   const OTP_ENABLED = false;
 
-  const handlePhoneDone   = () => setStep(2);
-  const handleProfileDone = () => {
-    // If the domain needs ID verification, go to the ID upload step instead
+  const handleDisclosuresDone = () => setStep(2); // skip OTP (step 1), go to profile
+  const handlePhoneDone       = () => setStep(2);
+  const handleProfileDone     = () => {
     if (userEmail && requiresIdVerification(userEmail)) {
-      setStep(3); // ID upload step
+      setStep(3);
     } else {
       router.replace("/dashboard");
     }
   };
 
-  // When OTP is disabled, always show profile step
-  const activeStep = OTP_ENABLED ? step : 2;
+  // Step routing:
+  // 0 = disclosures, 1 = OTP (skipped unless OTP_ENABLED), 2 = profile, 3 = ID
+  const activeStep = step === 0 ? 0 : OTP_ENABLED ? step : 2;
 
   return (
     <div className="relative min-h-screen flex items-center justify-center dot-grid overflow-hidden py-12 px-4">
@@ -507,7 +591,11 @@ export default function OnboardingPage() {
 
         <div className="glass-strong rounded-3xl p-8 border border-white/[0.08]">
           <AnimatePresence mode="wait">
-            {OTP_ENABLED && activeStep === 1 ? (
+            {activeStep === 0 ? (
+              <motion.div key="step0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
+                <DisclosuresStep onDone={handleDisclosuresDone} />
+              </motion.div>
+            ) : OTP_ENABLED && activeStep === 1 ? (
               <motion.div
                 key="step1"
                 initial={{ opacity: 0, x: 20 }}
