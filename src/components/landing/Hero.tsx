@@ -110,11 +110,29 @@ function FloatingCard({
 }
 
 export default function Hero() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "submitted">("idle");
+  const [phone, setPhone]   = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "submitted" | "error">("idle");
+  const [errMsg, setErrMsg] = useState("");
 
-  const handleJoin = () => {
-    if (email.trim()) setStatus("submitted");
+  const handleJoin = async () => {
+    const clean = phone.replace(/\D/g, "");
+    if (!/^[6-9]\d{9}$/.test(clean)) {
+      setErrMsg("Enter a valid 10-digit WhatsApp number.");
+      return;
+    }
+    setStatus("loading");
+    const res  = await fetch("/api/waitlist", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ phone: clean, source: "hero" }),
+    });
+    if (res.ok) {
+      setStatus("submitted");
+    } else {
+      const d = await res.json();
+      setErrMsg(d.error ?? "Something went wrong.");
+      setStatus("error");
+    }
   };
 
   return (
@@ -210,30 +228,43 @@ export default function Hero() {
             , not who you know.
           </motion.p>
 
-          {/* Email CTA */}
+          {/* WhatsApp CTA */}
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
           >
-            {status === "idle" ? (
-              <div className="flex flex-col sm:flex-row gap-3 max-w-md">
-                <input
-                  type="email"
-                  placeholder="your@college.ac.in"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleJoin()}
-                  className="flex-1 px-4 py-3.5 rounded-xl glass border border-white/[0.08] text-white placeholder-[#3a3a5a] font-tech text-sm focus:outline-none focus:border-violet-500/40 focus:bg-white/[0.05] transition-all"
-                />
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={handleJoin}
-                  className="px-6 py-3.5 rounded-xl btn-primary text-white font-display font-semibold text-sm whitespace-nowrap"
-                >
-                  Get Early Access
-                </motion.button>
+            {status !== "submitted" ? (
+              <div className="max-w-md">
+                <div className="flex gap-3 mb-2">
+                  {/* +91 prefix */}
+                  <div className="flex items-center gap-2 px-3.5 py-3.5 rounded-xl glass border border-white/[0.08] shrink-0">
+                    <span className="text-base">🇮🇳</span>
+                    <span className="font-tech text-sm text-white/70">+91</span>
+                  </div>
+                  <input
+                    type="tel"
+                    maxLength={10}
+                    placeholder="WhatsApp number"
+                    value={phone}
+                    onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "")); setErrMsg(""); }}
+                    onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                    className="flex-1 px-4 py-3.5 rounded-xl glass border border-white/[0.08] text-white placeholder-[#3a3a5a] font-tech text-sm focus:outline-none focus:border-green-500/40 focus:bg-white/[0.05] transition-all"
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={handleJoin}
+                    disabled={status === "loading"}
+                    className="px-5 py-3.5 rounded-xl btn-primary text-white font-display font-semibold text-sm whitespace-nowrap disabled:opacity-60"
+                  >
+                    {status === "loading" ? "…" : "Join →"}
+                  </motion.button>
+                </div>
+                {errMsg && <p className="font-tech text-xs text-red-400 ml-1">{errMsg}</p>}
+                <p className="font-tech text-xs text-white/30 ml-1 mt-1.5">
+                  We'll WhatsApp you when we launch on your campus.
+                </p>
               </div>
             ) : (
               <motion.div
@@ -243,7 +274,7 @@ export default function Hero() {
               >
                 <span className="text-emerald-400 text-lg">✓</span>
                 <span className="font-tech text-sm text-emerald-300">
-                  You&apos;re on the list — we&apos;ll reach out when we launch.
+                  You&apos;re on the list — we&apos;ll WhatsApp you when we launch on your campus.
                 </span>
               </motion.div>
             )}

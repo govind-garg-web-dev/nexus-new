@@ -42,7 +42,8 @@ function StatCard({ label, value, color }: { label: string; value: number; color
 }
 
 // ── Main page ───────────────────────────────────────────────
-type Tab = "stats" | "users" | "campuses" | "societies" | "referrals";
+type WaitlistEntry = { id: string; phone: string; source: string; created_at: string };
+type Tab = "stats" | "users" | "campuses" | "societies" | "referrals" | "waitlist";
 
 export default function AdminPage() {
   const [tab, setTab]           = useState<Tab>("stats");
@@ -69,6 +70,9 @@ export default function AdminPage() {
 
   // Referrals for recruiter tier
   const [referrals, setReferrals] = useState<{ id: string; company: string; role: string; recruiter_tier: boolean; company_verified: boolean; created_at: string }[]>([]);
+
+  // Waitlist
+  const [waitlist, setWaitlist]   = useState<WaitlistEntry[]>([]);
 
   const loadStats = useCallback(async () => {
     const res = await fetch("/api/admin/stats");
@@ -101,13 +105,20 @@ export default function AdminPage() {
     setReferrals(data.posts ?? []);
   }, []);
 
+  const loadWaitlist = useCallback(async () => {
+    const res = await fetch("/api/admin/waitlist");
+    if (!res.ok) return;
+    setWaitlist((await res.json()).entries ?? []);
+  }, []);
+
   useEffect(() => {
     if (tab === "stats")     loadStats();
     if (tab === "users")     loadUsers();
     if (tab === "campuses")  loadCampuses();
     if (tab === "societies") loadSocieties();
     if (tab === "referrals") loadReferrals();
-  }, [tab, loadStats, loadUsers, loadCampuses, loadSocieties, loadReferrals]);
+    if (tab === "waitlist")  loadWaitlist();
+  }, [tab, loadStats, loadUsers, loadCampuses, loadSocieties, loadReferrals, loadWaitlist]);
 
   const updateRole = async (userId: string, role: string) => {
     setActing(userId);
@@ -173,6 +184,7 @@ export default function AdminPage() {
     { key: "campuses",  label: "Campuses",      icon: "🏛" },
     { key: "societies", label: "Society Verify",icon: "✦" },
     { key: "referrals", label: "Recruiter Tier",icon: "💼" },
+    { key: "waitlist",  label: "Waitlist",       icon: "📱" },
   ];
 
   return (
@@ -401,6 +413,64 @@ export default function AdminPage() {
             ))}
             {referrals.length === 0 && <p className="font-tech text-sm text-white/40 text-center py-8">No referral posts yet.</p>}
           </div>
+        </div>
+      )}
+
+      {/* ── Waitlist ── */}
+      {tab === "waitlist" && (
+        <div>
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="font-display font-bold text-white text-xl">WhatsApp Waitlist</p>
+              <p className="font-tech text-sm text-white/40 mt-0.5">
+                {waitlist.length} number{waitlist.length !== 1 ? "s" : ""} collected
+              </p>
+            </div>
+            <a
+              href={`data:text/csv;charset=utf-8,Phone,Source,Joined\n${waitlist.map((e) => `+91${e.phone},${e.source},${new Date(e.created_at).toLocaleString("en-IN")}`).join("\n")}`}
+              download="nullspace-waitlist.csv"
+              className="px-4 py-2 rounded-xl border border-white/10 font-tech text-sm text-white/60 hover:text-white hover:border-white/20 transition-all"
+              style={{ background: "rgba(255,255,255,0.02)" }}
+            >
+              ↓ Export CSV
+            </a>
+          </div>
+
+          {waitlist.length === 0 ? (
+            <div className="rounded-2xl border border-white/8 p-10 text-center" style={{ background: "rgba(255,255,255,0.02)" }}>
+              <p className="text-3xl mb-2">📱</p>
+              <p className="font-display font-semibold text-white/50 text-lg">No entries yet</p>
+              <p className="font-tech text-sm text-white/30 mt-1">Numbers appear here as people join the waitlist.</p>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-white/8 overflow-hidden" style={{ background: "rgba(255,255,255,0.02)" }}>
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-white/8">
+                    <th className="text-left px-5 py-3 font-tech text-xs text-white/40 tracking-wider">#</th>
+                    <th className="text-left px-5 py-3 font-tech text-xs text-white/40 tracking-wider">WHATSAPP</th>
+                    <th className="text-left px-5 py-3 font-tech text-xs text-white/40 tracking-wider">SOURCE</th>
+                    <th className="text-left px-5 py-3 font-tech text-xs text-white/40 tracking-wider">JOINED</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {waitlist.map((e, i) => (
+                    <tr key={e.id} className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors">
+                      <td className="px-5 py-3 font-tech text-xs text-white/30">{i + 1}</td>
+                      <td className="px-5 py-3">
+                        <a href={`https://wa.me/91${e.phone}`} target="_blank" rel="noopener noreferrer"
+                          className="font-tech text-sm text-green-400 hover:text-green-300 transition-colors">
+                          +91 {e.phone.replace(/(\d{5})(\d{5})/, "$1 $2")}
+                        </a>
+                      </td>
+                      <td className="px-5 py-3 font-pixel text-[10px] tracking-widest text-white/30 uppercase">{e.source}</td>
+                      <td className="px-5 py-3 font-tech text-xs text-white/40">{timeAgo(e.created_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
