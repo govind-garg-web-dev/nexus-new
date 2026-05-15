@@ -2,6 +2,7 @@
 // Remove before going live beyond testing.
 const DEV_ALLOWED_EMAILS = new Set([
   "govindgarg.ne@gmail.com",
+  "govindgarg.parzel@gmail.com",
 ]);
 
 // Domains that are always rejected regardless of other rules
