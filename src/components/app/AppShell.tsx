@@ -99,7 +99,7 @@ export default function AppShell({ children, profile }: { children: React.ReactN
         {/* Logo */}
         <div className="px-4 py-4 border-b border-white/5">
           <Link href="/dashboard">
-            <img src="/logo.png" alt="MatchBatch" className="h-7 w-auto" />
+            <img src="/logo.png" alt="MatchBatch" className="w-full h-auto" />
           </Link>
         </div>
 
@@ -173,7 +173,7 @@ export default function AppShell({ children, profile }: { children: React.ReactN
       {/* ── Mobile topbar ── */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass border-b border-white/6 px-4 py-3 flex items-center justify-between">
         <Link href="/dashboard">
-          <img src="/logo.png" alt="MatchBatch" className="h-6 w-auto" />
+          <img src="/logo.png" alt="MatchBatch" className="h-12 w-auto" />
         </Link>
         <button onClick={() => setOpen(!open)} className="p-1">
           <span className="font-pixel text-white text-lg">{open ? "✕" : "☰"}</span>

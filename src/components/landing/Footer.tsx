@@ -31,7 +31,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <div className="mb-4">
-              <img src="/logo.png" alt="MatchBatch" className="h-7 w-auto" />
+              <img src="/logo.png" alt="MatchBatch" className="h-60 w-auto" />
             </div>
             <p className="text-[#5a5a7a] text-sm leading-relaxed font-tech mb-5">
               The anonymous, merit-based network for Indian college students.
