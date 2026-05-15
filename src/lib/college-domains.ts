@@ -197,3 +197,13 @@ export function validateCollegeEmail(email: string): EmailValidationResult {
 export function getCollegeName(domain: string): string | null {
   return DOMAIN_TO_COLLEGE[domain] ?? null;
 }
+
+// Returns true if this domain requires a college ID photo upload for verification.
+// Non-obvious domains (not .ac.in or .edu.in) that we've whitelisted need manual verification.
+export function requiresIdVerification(email: string): boolean {
+  const lower  = email.toLowerCase().trim();
+  const domain = lower.split("@")[1] ?? "";
+  if (DEV_ALLOWED_EMAILS.has(lower)) return false; // dev bypass
+  if (domain.endsWith(".ac.in") || domain.endsWith(".edu.in")) return false; // obvious institutional
+  return EXTRA_ALLOWED_DOMAINS.has(domain); // whitelisted non-standard domains need ID
+}

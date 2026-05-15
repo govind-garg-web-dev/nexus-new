@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
@@ -33,6 +33,7 @@ const NAV = [
   { href: "/societies",    label: "Societies",     icon: "🏛" },
   { href: "/leaderboard",  label: "Leaderboard",   icon: "🏆" },
   { href: "/co-founder",   label: "Co-Founder",    icon: "🚀" },
+  { href: "/mod",          label: "Mod Dashboard", icon: "🛡" },
   { href: "/profile",      label: "My Profile",    icon: "❋" },
 ];
 
@@ -67,6 +68,18 @@ function ScoreBadge({ score }: { score: number }) {
 }
 
 export default function AppShell({ children, profile }: { children: React.ReactNode; profile: Profile }) {
+  // Collect device fingerprint once on app load — used for multi-account detection
+  useEffect(() => {
+    import("@fingerprintjs/fingerprintjs").then(({ load }) => {
+      load().then((fp) => fp.get()).then((result) => {
+        fetch("/api/device-fingerprint", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ fingerprint: result.visitorId, userAgent: navigator.userAgent }),
+        }).catch(() => {}); // Silent — never block the UI
+      }).catch(() => {});
+    }).catch(() => {});
+  }, []);
   const pathname      = usePathname();
   const router        = useRouter();
   const [open, setOpen] = useState(false);

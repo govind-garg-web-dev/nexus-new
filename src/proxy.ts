@@ -2,7 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { validateCollegeEmail } from "@/lib/college-domains";
 
-const PROTECTED_ROUTES = ["/dashboard", "/profile", "/feed", "/chat", "/challenges", "/co-founder", "/vault", "/study-rooms", "/consulting", "/events", "/referrals", "/carpool", "/roommates", "/confessions", "/marketplace", "/circles", "/societies", "/daily", "/leaderboard"];
+const PROTECTED_ROUTES = ["/dashboard", "/profile", "/feed", "/chat", "/challenges", "/co-founder", "/vault", "/study-rooms", "/consulting", "/events", "/referrals", "/carpool", "/roommates", "/confessions", "/marketplace", "/circles", "/societies", "/daily", "/leaderboard", "/mod"];
+const SUSPENSION_EXEMPT = ["/suspended", "/sign-in", "/api"];
 const AUTH_ONLY_ROUTES = ["/sign-in"];
 
 export async function proxy(request: NextRequest) {
@@ -60,8 +61,21 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  // Onboarding gate is now handled in the protected layout —
-  // removed from middleware to eliminate the extra DB round-trip here.
+  // Suspension gate — suspended users only see /suspended page
+  // We check the JWT metadata for suspension to avoid a DB call in middleware.
+  // The actual suspension flag is set via DB; the next login will reflect it.
+  if (user && !SUSPENSION_EXEMPT.some((r) => pathname.startsWith(r))) {
+    // Check suspension flag from user metadata (set when score drops below 25)
+    // This is stored server-side in users table; we do a lightweight session check
+    const isSuspended = session?.user?.user_metadata?.is_suspended === true;
+    if (isSuspended && pathname !== "/suspended") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/suspended";
+      return NextResponse.redirect(url);
+    }
+  }
+
+  // Onboarding gate handled in the protected layout.
 
   return supabaseResponse;
 }

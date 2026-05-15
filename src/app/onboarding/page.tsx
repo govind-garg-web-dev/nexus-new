@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { getCollegeName } from "@/lib/college-domains";
+import { getCollegeName, requiresIdVerification } from "@/lib/college-domains";
 import CollegeSearch from "@/components/ui/CollegeSearch";
 import CustomSelect from "@/components/ui/CustomSelect";
 import { generateUsername } from "@/lib/random-username";
@@ -369,6 +369,82 @@ function ProfileStep({ userEmail, onDone }: { userEmail: string; onDone: () => v
   );
 }
 
+// ── Step 3: College ID verification (for non-obvious domains) ─────────────
+function IdVerificationStep({ onDone }: { onDone: () => void }) {
+  const [file, setFile]           = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError]         = useState("");
+
+  const submit = async () => {
+    if (!file) return;
+    setUploading(true);
+    const form = new FormData();
+    form.append("file", file);
+    const res  = await fetch("/api/id-verification", { method: "POST", body: form });
+    const data = await res.json();
+    setUploading(false);
+    if (!res.ok) { setError(data.error); return; }
+    setSubmitted(true);
+  };
+
+  if (submitted) {
+    return (
+      <div className="text-center py-6">
+        <div className="text-5xl mb-4">📋</div>
+        <h2 className="font-display font-bold text-white text-2xl mb-2">ID submitted!</h2>
+        <p className="font-tech text-sm text-white/60 mb-6">
+          Our team verifies within 24 hours. You can use the app in the meantime.
+        </p>
+        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+          onClick={onDone}
+          className="w-full py-3.5 rounded-xl btn-primary text-white font-display font-bold text-base">
+          Enter Nexus →
+        </motion.button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <StepDots step={2} />
+      <h2 className="font-display font-bold text-white text-2xl mb-2">
+        One more thing.
+      </h2>
+      <p className="font-tech text-sm text-[#8888aa] mb-6 leading-relaxed">
+        Your college uses a non-standard email domain. Please upload a photo of your college ID card to confirm enrollment. This is reviewed by a human — not AI.
+      </p>
+      <div
+        onClick={() => document.getElementById("id-file-input")?.click()}
+        className="rounded-2xl border-2 border-dashed border-white/10 hover:border-violet-500/30 p-8 text-center cursor-pointer transition-colors mb-4"
+      >
+        <input id="id-file-input" type="file" accept="image/*" className="hidden"
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+        {file ? (
+          <div>
+            <p className="font-display font-semibold text-white text-sm mb-1">{file.name}</p>
+            <p className="font-tech text-xs text-white/40">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+          </div>
+        ) : (
+          <>
+            <p className="font-display font-semibold text-white/60 text-sm mb-1">Click to upload your college ID</p>
+            <p className="font-tech text-xs text-white/30">JPEG, PNG · max 5 MB</p>
+          </>
+        )}
+      </div>
+      {error && <p className="font-tech text-sm text-red-400 mb-4">{error}</p>}
+      <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+        onClick={submit} disabled={!file || uploading}
+        className="w-full py-3.5 rounded-xl btn-primary text-white font-display font-bold text-base disabled:opacity-40 disabled:cursor-not-allowed mb-3">
+        {uploading ? "Uploading…" : "Submit ID →"}
+      </motion.button>
+      <button onClick={onDone} className="w-full font-tech text-xs text-white/30 hover:text-white/50 transition-colors py-2">
+        Skip for now (you may be asked to verify later)
+      </button>
+    </div>
+  );
+}
+
 // ── Main onboarding page ───────────────────────────────────
 export default function OnboardingPage() {
   const router = useRouter();
@@ -387,8 +463,15 @@ export default function OnboardingPage() {
   // To re-enable: set OTP_ENABLED = true — PhoneStep and routing are fully preserved.
   const OTP_ENABLED = false;
 
-  const handlePhoneDone = () => setStep(2);
-  const handleProfileDone = () => router.replace("/dashboard");
+  const handlePhoneDone   = () => setStep(2);
+  const handleProfileDone = () => {
+    // If the domain needs ID verification, go to the ID upload step instead
+    if (userEmail && requiresIdVerification(userEmail)) {
+      setStep(3); // ID upload step
+    } else {
+      router.replace("/dashboard");
+    }
+  };
 
   // When OTP is disabled, always show profile step
   const activeStep = OTP_ENABLED ? step : 2;
@@ -433,6 +516,10 @@ export default function OnboardingPage() {
                 transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               >
                 <PhoneStep onDone={handlePhoneDone} />
+              </motion.div>
+            ) : activeStep === 3 ? (
+              <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.4 }}>
+                <IdVerificationStep onDone={() => router.replace("/dashboard")} />
               </motion.div>
             ) : (
               <motion.div
