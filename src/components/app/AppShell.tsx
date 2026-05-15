@@ -91,8 +91,8 @@ export default function AppShell({ children, profile }: { children: React.ReactN
           </Link>
         </div>
 
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-0.5">
+        {/* Nav — scrollable, profile stays sticky at bottom */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-0.5 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
           {NAV.map((item) => {
             const active = pathname.startsWith(item.href);
             return (
@@ -165,7 +165,8 @@ export default function AppShell({ children, profile }: { children: React.ReactN
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          className="lg:hidden fixed top-12 left-0 right-0 z-30 glass border-b border-white/6 px-4 py-3 flex flex-col gap-1"
+          className="lg:hidden fixed top-12 left-0 right-0 z-30 glass border-b border-white/6 px-4 py-3 flex flex-col gap-1 overflow-y-auto"
+          style={{ maxHeight: "calc(100vh - 3rem)" }}
         >
           {NAV.map((item) => (
             <Link
