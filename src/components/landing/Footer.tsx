@@ -13,7 +13,7 @@ const cols = [
   },
   {
     heading: "Company",
-    links: ["Sign In", "About", "Blog", "Privacy Policy", "Terms of Use"],
+    links: ["About", "Blog", "Privacy Policy", "Terms of Use"],
   },
 ];
 

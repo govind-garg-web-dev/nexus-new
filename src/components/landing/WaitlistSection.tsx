@@ -90,9 +90,9 @@ export default function WaitlistSection() {
               We&apos;re launching on one campus first. Drop your WhatsApp number — we&apos;ll message you directly when we&apos;re live near you.
             </p>
 
-            {/* WhatsApp input */}
+            {/* WhatsApp input — stacked layout, works on all screen sizes */}
             {status !== "submitted" ? (
-              <div className="max-w-sm mx-auto mb-8">
+              <div className="max-w-sm mx-auto mb-8 w-full">
                 <div className="flex gap-2 mb-2">
                   <div className="flex items-center gap-2 px-3 py-3.5 rounded-xl glass border border-white/10 shrink-0">
                     <span className="text-base">🇮🇳</span>
@@ -105,19 +105,19 @@ export default function WaitlistSection() {
                     value={phone}
                     onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "")); setErrMsg(""); }}
                     onKeyDown={(e) => e.key === "Enter" && handleJoin()}
-                    className="flex-1 px-4 py-3.5 rounded-xl glass border border-white/10 text-white placeholder-[#3a3a5a] font-tech text-sm focus:outline-none focus:border-green-500/40 transition-all"
+                    className="flex-1 min-w-0 px-4 py-3.5 rounded-xl glass border border-white/10 text-white placeholder-[#3a3a5a] font-tech text-sm focus:outline-none focus:border-green-500/40 transition-all"
                   />
-                  <motion.button
-                    whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
-                    onClick={handleJoin}
-                    disabled={status === "loading"}
-                    className="px-5 py-3.5 rounded-xl btn-primary text-white font-display font-semibold text-sm whitespace-nowrap disabled:opacity-60"
-                  >
-                    {status === "loading" ? "…" : "Join →"}
-                  </motion.button>
                 </div>
-                {errMsg && <p className="font-tech text-xs text-red-400 text-left ml-1">{errMsg}</p>}
-                <p className="font-tech text-xs text-white/30 text-left ml-1 mt-1">
+                <motion.button
+                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                  onClick={handleJoin}
+                  disabled={status === "loading"}
+                  className="w-full py-3.5 rounded-xl btn-primary text-white font-display font-semibold text-sm disabled:opacity-60"
+                >
+                  {status === "loading" ? "…" : "Join Waitlist →"}
+                </motion.button>
+                {errMsg && <p className="font-tech text-xs text-red-400 text-left mt-2">{errMsg}</p>}
+                <p className="font-tech text-xs text-white/30 text-left mt-2">
                   We&apos;ll only WhatsApp you for the launch. No spam.
                 </p>
               </div>
@@ -150,10 +150,6 @@ export default function WaitlistSection() {
               Indian numbers only · No spam · We WhatsApp, not email
             </p>
 
-            <p className="font-tech text-xs text-[#3a3a5a] mt-4">
-              Already have an account?{" "}
-              <a href="/sign-in" className="text-violet-400 hover:text-violet-300 transition-colors">Sign in →</a>
-            </p>
           </div>
         </motion.div>
       </div>

@@ -235,10 +235,10 @@ export default function Hero() {
             transition={{ delay: 0.4, duration: 0.6 }}
           >
             {status !== "submitted" ? (
-              <div className="max-w-md">
-                <div className="flex gap-3 mb-2">
-                  {/* +91 prefix */}
-                  <div className="flex items-center gap-2 px-3.5 py-3.5 rounded-xl glass border border-white/[0.08] shrink-0">
+              <div className="max-w-md w-full">
+                {/* Row 1: +91 + input */}
+                <div className="flex gap-2 mb-2">
+                  <div className="flex items-center gap-2 px-3 py-3.5 rounded-xl glass border border-white/[0.08] shrink-0">
                     <span className="text-base">🇮🇳</span>
                     <span className="font-tech text-sm text-white/70">+91</span>
                   </div>
@@ -249,20 +249,21 @@ export default function Hero() {
                     value={phone}
                     onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "")); setErrMsg(""); }}
                     onKeyDown={(e) => e.key === "Enter" && handleJoin()}
-                    className="flex-1 px-4 py-3.5 rounded-xl glass border border-white/[0.08] text-white placeholder-[#3a3a5a] font-tech text-sm focus:outline-none focus:border-green-500/40 focus:bg-white/[0.05] transition-all"
+                    className="flex-1 min-w-0 px-4 py-3.5 rounded-xl glass border border-white/[0.08] text-white placeholder-[#3a3a5a] font-tech text-sm focus:outline-none focus:border-green-500/40 focus:bg-white/[0.05] transition-all"
                   />
-                  <motion.button
-                    whileHover={{ scale: 1.03 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={handleJoin}
-                    disabled={status === "loading"}
-                    className="px-5 py-3.5 rounded-xl btn-primary text-white font-display font-semibold text-sm whitespace-nowrap disabled:opacity-60"
-                  >
-                    {status === "loading" ? "…" : "Join →"}
-                  </motion.button>
                 </div>
-                {errMsg && <p className="font-tech text-xs text-red-400 ml-1">{errMsg}</p>}
-                <p className="font-tech text-xs text-white/30 ml-1 mt-1.5">
+                {/* Row 2: full-width button */}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleJoin}
+                  disabled={status === "loading"}
+                  className="w-full py-3.5 rounded-xl btn-primary text-white font-display font-semibold text-sm disabled:opacity-60"
+                >
+                  {status === "loading" ? "…" : "Join Waitlist →"}
+                </motion.button>
+                {errMsg && <p className="font-tech text-xs text-red-400 mt-2">{errMsg}</p>}
+                <p className="font-tech text-xs text-white/30 mt-2">
                   We'll WhatsApp you when we launch on your campus.
                 </p>
               </div>
@@ -280,21 +281,6 @@ export default function Hero() {
             )}
           </motion.div>
 
-          {/* Returning user sign-in */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.52 }}
-            className="font-tech text-xs text-[#4a4a6a] mt-3"
-          >
-            Already on MatchBatch?{" "}
-            <a
-              href="/sign-in"
-              className="text-violet-400 hover:text-violet-300 transition-colors underline underline-offset-2 decoration-violet-500/30"
-            >
-              Sign in →
-            </a>
-          </motion.p>
 
           {/* Social proof avatars */}
           <motion.div
