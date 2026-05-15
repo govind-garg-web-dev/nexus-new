@@ -25,9 +25,15 @@ const NAV = [
   { href: "/vault",       label: "Vault",         icon: "📚" },
   { href: "/study-rooms", label: "Study Rooms",   icon: "🍅" },
   { href: "/consulting",  label: "Help Rooms",    icon: "🛠" },
-  { href: "/challenges",  label: "Challenges",    icon: "◎" },
-  { href: "/co-founder",  label: "Co-Founder",    icon: "🚀" },
-  { href: "/profile",     label: "My Profile",    icon: "❋" },
+  { href: "/challenges",   label: "Challenges",    icon: "◎" },
+  { href: "/daily",        label: "Daily",         icon: "🔥" },
+  { href: "/confessions",  label: "Confessions",   icon: "💬" },
+  { href: "/marketplace",  label: "Marketplace",   icon: "🛍" },
+  { href: "/circles",      label: "Support",       icon: "💛" },
+  { href: "/societies",    label: "Societies",     icon: "🏛" },
+  { href: "/leaderboard",  label: "Leaderboard",   icon: "🏆" },
+  { href: "/co-founder",   label: "Co-Founder",    icon: "🚀" },
+  { href: "/profile",      label: "My Profile",    icon: "❋" },
 ];
 
 function ScoreBadge({ score }: { score: number }) {

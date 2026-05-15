@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { validateCollegeEmail } from "@/lib/college-domains";
 
-const PROTECTED_ROUTES = ["/dashboard", "/profile", "/feed", "/chat", "/challenges", "/co-founder", "/vault", "/study-rooms", "/consulting", "/events", "/referrals", "/carpool", "/roommates"];
+const PROTECTED_ROUTES = ["/dashboard", "/profile", "/feed", "/chat", "/challenges", "/co-founder", "/vault", "/study-rooms", "/consulting", "/events", "/referrals", "/carpool", "/roommates", "/confessions", "/marketplace", "/circles", "/societies", "/daily", "/leaderboard"];
 const AUTH_ONLY_ROUTES = ["/sign-in"];
 
 export async function proxy(request: NextRequest) {
