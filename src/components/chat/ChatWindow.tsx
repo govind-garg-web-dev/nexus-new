@@ -72,26 +72,45 @@ export default function ChatWindow({ matchId, myId, otherUser, initialMessages }
   const sendMessage = useCallback(async (content: string) => {
     if (!content.trim() || sending) return;
 
-    // Client-side crisis detection
     if (detectCrisis(content)) {
       setPendingMessage(content);
       setShowCrisis(true);
       return;
     }
 
+    // Optimistic — shows instantly without waiting for Realtime
+    const tempId = `temp-${Date.now()}`;
+    const optimistic: Message = {
+      id:         tempId,
+      sender_id:  myId,
+      content:    content.trim(),
+      type:       "text",
+      image_url:  null,
+      created_at: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, optimistic]);
+    setInput("");
     setSending(true);
+
     const res  = await fetch(`/api/chat/${matchId}`, {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ content }),
     });
+    const data = await res.json();
     setSending(false);
 
-    if (res.ok) {
-      setInput("");
-      // Message will arrive via Realtime — no need to push manually
+    if (!res.ok) {
+      // Revert optimistic message on failure
+      setMessages((prev) => prev.filter((m) => m.id !== tempId));
+      return;
     }
-  }, [matchId, sending]);
+
+    // Replace temp ID with real server ID from Realtime or response
+    if (data.message?.id) {
+      setMessages((prev) => prev.map((m) => m.id === tempId ? { ...m, id: data.message.id } : m));
+    }
+  }, [matchId, myId, sending]);
 
   const handleSend = () => sendMessage(input);
 

@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getCollegeName } from "@/lib/college-domains";
 import CollegeSearch from "@/components/ui/CollegeSearch";
 import CustomSelect from "@/components/ui/CustomSelect";
+import { generateUsername } from "@/lib/random-username";
 
 const BRANCHES = [
   "Computer Science & Engineering",
@@ -179,7 +180,7 @@ function ProfileStep({ userEmail, onDone }: { userEmail: string; onDone: () => v
   const domain = userEmail.split("@")[1] ?? "";
   const detectedCollege = getCollegeName(domain);
 
-  const [pseudonym, setPseudonym] = useState("");
+  const [pseudonym, setPseudonym] = useState(() => generateUsername());
   const [college, setCollege] = useState(detectedCollege ?? "");
   const [branch, setBranch] = useState("");
   const [batchYear, setBatchYear] = useState<number>(CURRENT_YEAR);
@@ -189,6 +190,12 @@ function ProfileStep({ userEmail, onDone }: { userEmail: string; onDone: () => v
   const [pseudonymAvail, setPseudonymAvail] = useState<"idle" | "checking" | "taken" | "available">("idle");
 
   const supabase = createClient();
+
+  const rerollUsername = () => {
+    const next = generateUsername();
+    setPseudonym(next);
+    checkPseudonym(next);
+  };
 
   const checkPseudonym = async (val: string) => {
     if (val.length < 3) { setPseudonymAvail("idle"); return; }
@@ -277,23 +284,32 @@ function ProfileStep({ userEmail, onDone }: { userEmail: string; onDone: () => v
         </div>
       </div>
 
-      {/* Pseudonym */}
+      {/* Pseudonym — auto-generated, re-rollable */}
       <div className="mb-5">
         <div className="flex items-center justify-between mb-2">
-          <label className="font-tech text-xs font-semibold text-[#8888aa]">Pseudonym</label>
+          <label className="font-tech text-xs font-semibold text-[#8888aa]">Your Campus Alias</label>
           <span className="font-tech text-xs">{pseudonymStatus}</span>
         </div>
-        <input
-          placeholder="PixelMage_87"
-          value={pseudonym}
-          onChange={(e) => {
-            const v = e.target.value.replace(/[^a-zA-Z0-9_]/g, "").slice(0, 20);
-            setPseudonym(v);
-            checkPseudonym(v);
-          }}
-          className="w-full px-4 py-3.5 rounded-xl bg-white/3 border border-white/10 text-white placeholder-[#3a3a5a] font-tech text-sm focus:outline-none focus:border-violet-500/50 focus:bg-white/5 transition-all"
-        />
-        <p className="font-tech text-xs text-[#5a5a7a] mt-1.5">3–20 chars · letters, numbers, underscore only</p>
+        <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-white/3 border border-violet-500/20">
+          <div
+            className="w-8 h-8 rounded-lg flex items-center justify-center font-pixel text-white text-sm shrink-0"
+            style={{ backgroundColor: avatarColor, boxShadow: `0 0 8px ${avatarColor}50` }}
+          >
+            {pseudonym[0]?.toUpperCase() ?? "?"}
+          </div>
+          <span className="flex-1 font-display font-bold text-white text-lg tracking-tight">{pseudonym}</span>
+          <button
+            type="button"
+            onClick={rerollUsername}
+            title="Generate a new name"
+            className="font-pixel text-violet-400 hover:text-violet-200 transition-colors text-base px-2"
+          >
+            ↻
+          </button>
+        </div>
+        <p className="font-tech text-xs text-[#5a5a7a] mt-1.5">
+          Auto-generated · like Reddit · click ↻ to get a new one
+        </p>
       </div>
 
       {/* College — searchable autocomplete */}
@@ -344,7 +360,7 @@ function ProfileStep({ userEmail, onDone }: { userEmail: string; onDone: () => v
       <motion.button
         whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
         onClick={handleSubmit}
-        disabled={!pseudonym || !college || !branch || pseudonymAvail !== "available" || loading}
+        disabled={!pseudonym || !college || !branch || loading}
         className="w-full py-3.5 rounded-xl btn-primary text-white font-display font-semibold text-sm disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {loading ? "Setting up your profile…" : "Enter Nexus →"}
